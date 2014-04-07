@@ -311,10 +311,12 @@ final class Web extends AbstractWebApplication {
     public function setError($message, $code, $exception = null) {
 
         $trace = null;
+        $extra = "";
 
         if (JDEBUG) {
             if (isset($exception)) {
                 $trace = $exception->getTrace();
+                $extra = $exception->getFile() . ":" . $exception->getLine();
             } else {
                 $trace = array_slice(debug_backtrace(), 2);
             }
@@ -323,7 +325,8 @@ final class Web extends AbstractWebApplication {
         $this->error = array(
             'message'   => $message,
             'code'      => $code,
-            'backtrace' => $trace
+            'backtrace' => $trace,
+            'extra'     => $extra
         );
     }
 
