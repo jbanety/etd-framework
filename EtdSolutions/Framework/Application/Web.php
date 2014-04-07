@@ -415,7 +415,7 @@ final class Web extends AbstractWebApplication {
         try {
             $result = $controller->execute();
         } catch (\Exception $e) {
-            $this->raiseError($e->getMessage(), 500, $e);
+            $this->raiseError($e->getMessage(), $e->getCode(), $e);
         }
 
         $this->render($result);
@@ -442,7 +442,7 @@ final class Web extends AbstractWebApplication {
             // On détermine le controller grâce au router.
             $controller = $this->router->getController($route);
         } catch (\Exception $e) {
-            $this->raiseError($e->getMessage(), 404, $e);
+            $this->raiseError($e->getMessage(), $e->getCode(), $e);
         }
 
         return $controller;
