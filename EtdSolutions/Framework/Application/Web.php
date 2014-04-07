@@ -39,6 +39,9 @@ final class Web extends AbstractWebApplication {
      */
     protected $language;
 
+    /**
+     * @var array Liste des messages devant être affichés à l'utilisateur.
+     */
     protected $_messageQueue = array();
 
     /**
@@ -46,6 +49,9 @@ final class Web extends AbstractWebApplication {
      */
     protected $db;
 
+    /**
+     * @var array Dernière erreur.
+     */
     protected $error;
 
     /**
@@ -163,6 +169,14 @@ final class Web extends AbstractWebApplication {
         }
     }
 
+    /**
+     * Redirige le navigateur vers une nouvelle adresse.
+     *
+     * @param string $url     La nouvelle URL
+     * @param string $msg     Message a afficher à l'utilisateur
+     * @param string $msgType Type du message
+     * @param bool   $moved   Redirection 301 pour indiquer une page qui a changé d'emplacement (SEF)
+     */
     public function redirect($url, $msg = '', $msgType = 'message', $moved = false) {
 
         // Check for relative internal links.
