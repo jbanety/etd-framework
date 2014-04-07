@@ -355,6 +355,9 @@ final class Web extends AbstractWebApplication {
             case 401:
                 $status = '401 Unauthorized';
                 break;
+            case 403:
+                $status = '403 Forbidden';
+                break;
             case 404:
                 $status = '404 Not found';
                 break;
@@ -475,6 +478,9 @@ final class Web extends AbstractWebApplication {
                 switch ($result['status']) {
                     case 401:
                         $status = '401 Unauthorized';
+                        break;
+                    case 403:
+                        $status = '403 Forbidden';
                         break;
                     case 404:
                         $status = '404 Not found';
