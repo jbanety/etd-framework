@@ -35,6 +35,11 @@ final class Web extends AbstractWebApplication {
     public $router;
 
     /**
+     * @var string Le controller par défaut de l'application.
+     */
+    protected $defaultController;
+
+    /**
      * @var Language La langue de l'application.
      */
     protected $language;
@@ -62,6 +67,9 @@ final class Web extends AbstractWebApplication {
 
         // On initialise la langue.
         $this->getLanguage();
+
+        // On récupère le controller par défaut depuis le conf.
+        $this->defaultController = $this->get('default_controller');
     }
 
     /**
@@ -363,7 +371,7 @@ final class Web extends AbstractWebApplication {
 
         // On instancie le routeur.
         $this->router = new Router();
-        $this->router->setDefaultController('EtdSolutions\Framework\Controller\LoginController');
+        $this->router->setDefaultController($this->defaultController);
 
         // On définit les routes.
         $this->router->addMaps($this->get('routes', array()));
