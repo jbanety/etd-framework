@@ -316,7 +316,7 @@ final class Web extends AbstractWebApplication {
         if (JDEBUG) {
             if (isset($exception)) {
                 $trace = $exception->getTrace();
-                $extra = $exception->getFile() . ":" . $exception->getLine();
+                $extra = str_replace(JPATH_ROOT, "", $exception->getFile()) . ":" . $exception->getLine();
             } else {
                 $trace = array_slice(debug_backtrace(), 2);
             }
