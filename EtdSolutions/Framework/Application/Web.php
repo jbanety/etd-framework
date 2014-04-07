@@ -301,21 +301,51 @@ final class Web extends AbstractWebApplication {
         return $this->_messageQueue;
     }
 
-    public function setError($message, $code) {
+    /**
+     * Méthode pour définit une erreur dans l'application.
+     *
+     * @param string     $message
+     * @param int        $code
+     * @param \Exception $exception
+     */
+    public function setError($message, $code, $exception = null) {
+
+        $trace = null;
+
+        if (JDEBUG) {
+            if (isset($exception)) {
+                $trace = $exception->getTrace();
+            } else {
+                $trace = array_slice(debug_backtrace(), 2);
+            }
+        }
 
         $this->error = array(
             'message'   => $message,
             'code'      => $code,
-            'backtrace' => array_slice(debug_backtrace(), 2)
+            'backtrace' => $trace
         );
     }
 
+    /**
+     * Retourne la dernière erreur enregistrée.
+     *
+     * @return array    L'erreur
+     */
     public function getError() {
 
         return $this->error;
     }
 
-    public function raiseError($message, $code = 500) {
+    /**
+     * Méthode pour déclencher une erreur.
+     * On arrête le flux et on affiche la page d'erreur.
+     *
+     * @param string     $message   Message d'erreur à afficher.
+     * @param int        $code      Code de l'erreur.
+     * @param \Exception $exception L'exception déclenchée si disponible.
+     */
+    public function raiseError($message, $code = 500, $exception = null) {
 
         $this->clearHeaders();
         switch ($code) {
@@ -333,7 +363,7 @@ final class Web extends AbstractWebApplication {
                 break;
         }
         $this->setHeader('status', $status);
-        $this->setError($message, $code);
+        $this->setError($message, $code, $exception);
         $controller = new ErrorController();
         $this->setBody($controller->execute());
         $this->respond();
@@ -382,7 +412,7 @@ final class Web extends AbstractWebApplication {
         try {
             $result = $controller->execute();
         } catch (\Exception $e) {
-            $this->raiseError($e->getMessage());
+            $this->raiseError($e->getMessage(), 500, $e);
         }
 
         $this->render($result);
@@ -409,7 +439,7 @@ final class Web extends AbstractWebApplication {
             // On détermine le controller grâce au router.
             $controller = $this->router->getController($route);
         } catch (\Exception $e) {
-            $this->raiseError($e->getMessage(), 404);
+            $this->raiseError($e->getMessage(), 404, $e);
         }
 
         return $controller;

@@ -157,7 +157,7 @@ abstract class Controller extends AbstractController {
             $result = $view->render();
         } catch (\Exception $e) {
             $this->getApplication()
-                 ->raiseError($e->getMessage(), 404);
+                 ->raiseError($e->getMessage(), 404, $e);
         }
 
         // On retourne le rendu.
