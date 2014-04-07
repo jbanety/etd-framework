@@ -118,11 +118,35 @@ abstract class Controller extends AbstractController {
 
     public function display($view = null) {
 
-        if (isset($view)) {
-            $className = '\\EtdSolutions\Framework\\View\\' . ucfirst($view) . 'View';
-        } elseif (isset($this->defaultView)) {
-            $className = '\\EtdSolutions\Framework\\View\\' . ucfirst($this->defaultView) . 'View';
-        } else {
+        // On définit la liste des espaces de noms dans laquelle la vue peut se trouver.
+        $namespaces = array(
+            '\\EtdSolutions\\Framework',
+            $this->getApplication()->get('app_namespace')
+        );
+
+        $className = "";
+
+        // On cherche la vue dans ces espaces de nom.
+        foreach($namespaces as $namespace) {
+
+            // On crée le nom de la classe.
+            if (isset($view)) {
+                $className = $namespace . '\\View\\' . ucfirst($view) . 'View';
+            } elseif (isset($this->defaultView)) {
+                $className = $namespace . '\\View\\' . ucfirst($this->defaultView) . 'View';
+            } else {
+                throw new \RuntimeException("Unable to find a view", 500);
+            }
+
+            // Si on a trouvé la classe, on arrête.
+            if (class_exists($className)) {
+                break;
+            }
+
+        }
+
+        // On vérifie que l'on a bien une classe valide.
+        if (!class_exists($className)) {
             throw new \RuntimeException("Unable to find a view", 500);
         }
 

@@ -37,12 +37,39 @@ abstract class Model extends AbstractDatabaseModel {
      * @param   string $name Le nom du modèle
      *
      * @return  mixed  L'instance.
+     *
+     * @throws   \RuntimeException
      */
     public static function getInstance($name) {
 
         $name = ucfirst($name);
         if (empty(self::$instance[$name])) {
-            $className             = "\\EtdSolutions\Framework\\Model\\" . $name . "Model";
+
+            // On définit la liste des espaces de noms dans laquelle le modèle peut se trouver.
+            $namespaces = array(
+                '\\EtdSolutions\\Framework',
+                Web::getInstance()->get('app_namespace')
+            );
+
+            $className = "";
+
+            // On cherche le modèle dans ces espaces de nom.
+            foreach($namespaces as $namespace) {
+
+                $className = $namespace . '\\Model\\' . ucfirst($name) . 'Model';
+
+                // Si on a trouvé la classe, on arrête.
+                if (class_exists($className)) {
+                    break;
+                }
+
+            }
+
+            // On vérifie que l'on a bien une classe valide.
+            if (!class_exists($className)) {
+                throw new \RuntimeException("Unable find model " . $name, 500);
+            }
+
             self::$instance[$name] = new $className;
         }
 
