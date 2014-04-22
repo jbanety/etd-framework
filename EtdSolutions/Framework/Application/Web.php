@@ -11,6 +11,7 @@
 namespace EtdSolutions\Framework\Application;
 
 use EtdSolutions\Framework\Controller\ErrorController;
+use EtdSolutions\Framework\Document\Document;
 use Joomla\Application\AbstractWebApplication;
 use Joomla\Database\DatabaseFactory;
 use Joomla\Database\DatabaseDriver;
@@ -139,6 +140,17 @@ final class Web extends AbstractWebApplication {
         }
 
         return $this->language;
+    }
+
+    /**
+     * Renvoi le document.
+     *
+     * @return Document
+     *
+     * @note Juste un proxy vers Document::getInstance
+     */
+    public function getDocument() {
+        return Document::getInstance();
     }
 
     /**
@@ -479,6 +491,15 @@ final class Web extends AbstractWebApplication {
      */
     protected function render($result = null) {
 
+        // On récupère le document.
+        $doc = $this->getDocument();
+
+        // On parse le document
+        $doc->parse();
+
+        // Description
+        $doc->setDescription($this->get('description'));
+
         // C'est un string => HTML
         if (is_string($result)) {
 
@@ -514,8 +535,14 @@ final class Web extends AbstractWebApplication {
 
         }
 
+        // Contenu du controller
+        $doc->setPositionContent('main', $result);
+
+        // On effectue le rendu du document.
+        $data = $doc->render();
+
         // On affecte le résultat au corps de la réponse.
-        $this->setBody($result);
+        $this->setBody($data);
 
     }
 
