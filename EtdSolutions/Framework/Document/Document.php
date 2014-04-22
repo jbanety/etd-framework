@@ -240,7 +240,7 @@ class Document {
 
         $matches = array();
 
-        if (preg_match_all('#<!--\[([^\]]+)\]-->#iU', $this->template, $matches)) {
+        if (preg_match_all('#<!--\[etd:([^\]]+)\]-->#iU', $this->template, $matches)) {
             $positions = array();
 
             // Step through the positions in reverse order.
