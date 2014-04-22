@@ -65,6 +65,9 @@ class Document {
         $this->styles['head'] = array();
         $this->styles['foot'] = array();
 
+        $this->stylesheets['head'] = array();
+        $this->stylesheets['foot'] = array();
+
     }
 
     /**

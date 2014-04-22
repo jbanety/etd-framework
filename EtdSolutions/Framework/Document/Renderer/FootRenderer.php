@@ -37,6 +37,13 @@ class FootRenderer extends DocumentRenderer {
 
         $buffer = '';
 
+        // Generate stylesheet links
+        if (count($document->stylesheets['foot'])) {
+            foreach ($document->stylesheets['foot'] as $src) {
+                $buffer .= '<link rel="stylesheet" href="' . $src . '">'."\n";
+            }
+        }
+
         // Generate stylesheet declarations
         if (count($document->styles['foot'])) {
             $buffer .= '<style>'."\n";

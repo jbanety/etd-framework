@@ -48,8 +48,10 @@ class HeadRenderer extends DocumentRenderer {
         $buffer .= '<meta name="viewport" content="width=device-width, initial-scale=1">'."\n";
 
         // Generate stylesheet links
-        foreach ($document->stylesheets as $src) {
-            $buffer .= '<link rel="stylesheet" href="' . $src . '">'."\n";
+        if (count($document->stylesheets['head'])) {
+            foreach ($document->stylesheets['head'] as $src) {
+                $buffer .= '<link rel="stylesheet" href="' . $src . '">'."\n";
+            }
         }
 
         // Generate stylesheet declarations
