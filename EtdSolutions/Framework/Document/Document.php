@@ -54,6 +54,19 @@ class Document {
 
     private static $instance;
 
+    function __construct() {
+
+        $this->scripts['head'] = array();
+        $this->scripts['foot'] = array();
+
+        $this->js['head'] = array();
+        $this->js['foot'] = array();
+
+        $this->styles['head'] = array();
+        $this->styles['foot'] = array();
+
+    }
+
     /**
      * Retourne une référence à l'objet global Document, en le créant seulement si besoin.
      *
@@ -203,10 +216,10 @@ class Document {
      */
     protected function getRenderer($position) {
 
-        $class = '\\EtdSolutions\\Framework\\\Document\\Renderer\\' . ucfirst($position) . 'Renderer';
+        $class = '\\EtdSolutions\\Framework\\Document\\Renderer\\' . ucfirst($position) . 'Renderer';
 
         if (!class_exists($class)) {
-            throw new \RuntimeException('Unable to load renderer class', 500);
+            throw new \RuntimeException('Unable to load renderer class ' . ucfirst($position) . 'Renderer', 500);
         }
 
         $instance = new $class($this);
