@@ -150,7 +150,7 @@ class Document {
         return $this;
     }
 
-    public function addStylesheet($url, $position = "foot") {
+    public function addStylesheet($url, $position = "head") {
 
         if (!in_array($url, $this->stylesheets[$position])) {
             $this->stylesheets[$position][]  = $url;
@@ -159,7 +159,7 @@ class Document {
         return $this;
     }
 
-    public function addCSS($css, $position = "foot") {
+    public function addCSS($css, $position = "head") {
 
         if (!in_array($css, $this->styles[$position])) {
             $this->styles[$position][]  = $css;
