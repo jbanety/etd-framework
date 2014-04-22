@@ -218,7 +218,7 @@ class Document {
 
         $contents = '';
 
-        $file = JPATH_THEMES . '/template.php';
+        $file = JPATH_THEME . '/template.php';
 
         // Check to see if we have a valid template file
         if (file_exists($file)) {
