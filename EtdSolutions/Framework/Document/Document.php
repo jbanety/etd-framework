@@ -135,7 +135,7 @@ class Document {
     public function addScript($url, $position = "foot") {
 
         if (!in_array($url, $this->scripts[$position])) {
-            $this->scripts[$position]  = $url;
+            $this->scripts[$position][]  = $url;
         }
 
         return $this;
@@ -144,7 +144,7 @@ class Document {
     public function addJS($script, $position = "foot") {
 
         if (!in_array($script, $this->js[$position])) {
-            $this->js[$position]  = $script;
+            $this->js[$position][]  = $script;
         }
 
         return $this;
@@ -153,7 +153,7 @@ class Document {
     public function addStylesheet($url, $position = "foot") {
 
         if (!in_array($url, $this->stylesheets[$position])) {
-            $this->stylesheets[$position]  = $url;
+            $this->stylesheets[$position][]  = $url;
         }
 
         return $this;
@@ -162,7 +162,7 @@ class Document {
     public function addCSS($css, $position = "foot") {
 
         if (!in_array($css, $this->styles[$position])) {
-            $this->styles[$position]  = $css;
+            $this->styles[$position][]  = $css;
         }
 
         return $this;
