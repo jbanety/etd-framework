@@ -16,7 +16,7 @@ defined('_JEXEC') or die;
 
 class FootRenderer extends DocumentRenderer {
 
-    public function render($position) {
+    public function render() {
 
         ob_start();
         echo $this->fetchFoot($this->_doc);

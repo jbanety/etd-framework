@@ -16,7 +16,7 @@ defined('_JEXEC') or die;
 
 class MessageRenderer extends DocumentRenderer {
 
-    public function render($position) {
+    public function render() {
 
         // Initialise variables.
         $buffer = '';

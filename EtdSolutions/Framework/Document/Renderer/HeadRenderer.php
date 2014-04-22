@@ -16,7 +16,7 @@ defined('_JEXEC') or die;
 
 class HeadRenderer extends DocumentRenderer {
 
-    public function render($position) {
+    public function render() {
 
         ob_start();
         echo $this->fetchHead($this->_doc);
