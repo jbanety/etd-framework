@@ -10,6 +10,7 @@
 
 namespace EtdSolutions\Framework\Document;
 
+use EtdSolutions\Framework\Application\Web;
 use EtdSolutions\Framework\Document\Renderer\DocumentRenderer;
 
 defined('_JEXEC') or die;
@@ -213,19 +214,44 @@ class Document {
     }
 
     /**
+     * Méthode pour charger le renderer correspondant à la position.
+     *
+     * @param $position string Le nom de la position
+     *
      * @return DocumentRenderer
      *
      * @throws  \RuntimeException
      */
     protected function getRenderer($position) {
 
-        $class = '\\EtdSolutions\\Framework\\Document\\Renderer\\' . ucfirst($position) . 'Renderer';
+        // On définit la liste des espaces de noms dans laquelle le renderer peut se trouver.
+        $namespaces = array(
+            '\\EtdSolutions\\Framework',
+            Web::getInstance()->get('app_namespace')
+        );
 
-        if (!class_exists($class)) {
+        $className = "";
+
+        // On cherche la vue dans ces espaces de nom.
+        foreach($namespaces as $namespace) {
+
+            // On crée le nom de la classe.
+            $className = $namespace . '\\Document\\Renderer\\' . ucfirst($position) . 'Renderer';
+
+            // Si on a trouvé la classe, on arrête.
+            if (class_exists($className)) {
+                break;
+            }
+
+        }
+
+        // On vérifie que l'on a bien une classe valide.
+        if (!class_exists($className)) {
             throw new \RuntimeException('Unable to load renderer class ' . ucfirst($position) . 'Renderer', 500);
         }
 
-        $instance = new $class($this);
+        // On instancie le renderer.
+        $instance = new $className($this);
 
         return $instance;
     }
