@@ -51,7 +51,7 @@ class HtmlView extends AbstractHtmlView {
     protected function loadPaths() {
 
         $paths = new \SplPriorityQueue;
-        $paths->insert(JPATH_THEME . '/html/' . $this->getName(), 1);
+        $paths->insert(JPATH_THEME . '/html/views/' . $this->getName(), 1);
         $this->paths = $paths;
 
         return $this->paths;
