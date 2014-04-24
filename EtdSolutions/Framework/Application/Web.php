@@ -56,6 +56,11 @@ final class Web extends AbstractWebApplication {
     protected $error;
 
     /**
+     * @var string Nom du controller actif dans l'application.
+     */
+    protected $_activeController = '';
+
+    /**
      * @var  Web  L'instance de l'application.
      */
     private static $instance;
@@ -366,6 +371,10 @@ final class Web extends AbstractWebApplication {
         return $this->error;
     }
 
+    public function getActiveController() {
+        return $this->_activeController;
+    }
+
     /**
      * Méthode pour déclencher une erreur.
      * On arrête le flux et on affiche la page d'erreur.
@@ -439,6 +448,9 @@ final class Web extends AbstractWebApplication {
 
         // On récupère le controller.
         $controller = $this->route();
+
+        // On sauvegarde le controller actif.
+        $this->_activeController = $controller->getName();
 
         // On exécute la logique du controller.
         try {
