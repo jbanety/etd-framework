@@ -452,14 +452,17 @@ final class Web extends AbstractWebApplication {
         // On sauvegarde le controller actif.
         $this->_activeController = $controller->getName();
 
-        // On exécute la logique du controller.
         try {
+
+            // On exécute la logique du controller et on récupère le résultat.
             $result = $controller->execute();
+
+            // On effectue le rendu de la page avec le résultat.
+            $this->render($result);
+
         } catch (\Exception $e) {
             $this->raiseError($e->getMessage(), $e->getCode(), $e);
         }
-
-        $this->render($result);
 
     }
 
