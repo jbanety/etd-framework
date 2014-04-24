@@ -245,6 +245,8 @@ class Document {
             $contents = ob_get_contents();
             ob_end_clean();
 
+        } else {
+            throw new \RuntimeException('Unable to find template', 500);
         }
 
         $this->template = $contents;
