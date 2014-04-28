@@ -155,6 +155,7 @@ final class Web extends AbstractWebApplication {
      * @note Juste un proxy vers Document::getInstance
      */
     public function getDocument() {
+
         return Document::getInstance();
     }
 
@@ -409,6 +410,71 @@ final class Web extends AbstractWebApplication {
         $this->setBody($controller->execute());
         $this->respond();
         $this->close();
+    }
+
+    /**
+     * Donne l'état de l'utilisateur.
+     *
+     * @param   string $key     Le chemin dans l'état.
+     * @param   mixed  $default Valeur par défaut optionnelle, retournée si la valeur est null.
+     *
+     * @return  mixed  L'état ou null.
+     */
+    public function getUserState($key, $default = null) {
+
+        $session  = $this->getSession();
+        $registry = $session->get('state');
+
+        if (!is_null($registry)) {
+            return $registry->get($key, $default);
+        }
+
+        return $default;
+    }
+
+    /**
+     * Donne la valeur d'une variable de l'état de l'utilisateur.
+     *
+     * @param   string $key     La clé de la variable.
+     * @param   string $request Le nom de la varaible passée dans la requête.
+     * @param   string $default La valeur par défaut de la variale si non trouvée. Optionnel.
+     * @param   string $type    Filtre pour la variable. Optionnel.
+     *
+     * @return  object  L'état.
+     */
+    public function getUserStateFromRequest($key, $request, $default = null, $type = 'none') {
+
+        $cur_state = $this->getUserState($key, $default);
+        $new_state = $this->input->get($request, null, $type);
+
+        // Save the new value only if it was set in this request.
+        if ($new_state !== null) {
+            $this->setUserState($key, $new_state);
+        } else {
+            $new_state = $cur_state;
+        }
+
+        return $new_state;
+    }
+
+    /**
+     * Définit la valeur d'une variable de l'état utilisateur.
+     *
+     * @param   string $key   Le chemin dans l'état.
+     * @param   string $value La valeur de la variable.
+     *
+     * @return  mixed  L'état précédent s'il existe.
+     */
+    public function setUserState($key, $value) {
+
+        $session  = $this->getSession();
+        $registry = $session->get('state');
+
+        if (!is_null($registry)) {
+            return $registry->set($key, $value);
+        }
+
+        return null;
     }
 
     /**

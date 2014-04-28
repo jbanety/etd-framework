@@ -12,6 +12,7 @@ namespace EtdSolutions\Framework\Model;
 
 use EtdSolutions\Framework\Application\Web;
 use Joomla\Model\AbstractDatabaseModel;
+use Joomla\Registry\Registry;
 
 defined('_JEXEC') or die;
 
@@ -21,14 +22,33 @@ defined('_JEXEC') or die;
 abstract class Model extends AbstractDatabaseModel {
 
     /**
+     * Indique si l'état interne du modèle est définit
+     *
+     * @var    boolean
+     */
+    protected $__state_set = null;
+
+    /**
      * @var  Model  L'instance de l'application.
      */
     private static $instance;
 
-    public function __construct() {
+    protected $name;
+
+    /**
+     * Instancie le modèle.
+     *
+     * @param Registry $state          L'état du modèle.
+     * @param bool     $ignore_request Utilisé pour ignorer la mise à jour de l'état depuis la requête.
+     */
+    public function __construct(Registry $state = null, $ignore_request = false) {
+
+        if ($ignore_request) {
+            $this->__state_set = true;
+        }
 
         parent::__construct(Web::getInstance()
-                               ->getDb());
+                               ->getDb(), $state);
     }
 
     /**
@@ -54,7 +74,7 @@ abstract class Model extends AbstractDatabaseModel {
             $className = "";
 
             // On cherche le modèle dans ces espaces de nom.
-            foreach($namespaces as $namespace) {
+            foreach ($namespaces as $namespace) {
 
                 $className = $namespace . '\\Model\\' . ucfirst($name) . 'Model';
 
@@ -86,6 +106,15 @@ abstract class Model extends AbstractDatabaseModel {
      */
     public function get($path, $default = null) {
 
+        if (!$this->__state_set) {
+
+            // Méthode pour remplir automatiquement l'état du modèle.
+            $this->populateState();
+
+            // On dit que l'état est définit.
+            $this->__state_set = true;
+        }
+
         return $this->state->get($path, $default);
     }
 
@@ -114,6 +143,41 @@ abstract class Model extends AbstractDatabaseModel {
     public function set($path, $value) {
 
         return $this->state->set($path, $value);
+    }
+
+    /**
+     * Méthode pour récupérer le nom du modèle.
+     *
+     * @return  string  Le nom du modèle.
+     *
+     * @throws  \RuntimeException
+     */
+    public function getName() {
+
+        if (empty($this->name)) {
+            $r         = null;
+            $classname = join('', array_slice(explode('\\', get_class($this)), -1));
+            if (!preg_match('/(.*)Model/i', $classname, $r)) {
+                throw new \RuntimeException('Unable to detect model name', 500);
+            }
+            $this->name = strtolower($r[1]);
+        }
+
+        return $this->name;
+    }
+
+    /**
+     * Méthode pour définir automatiquement l'état du modèle.
+     *
+     * Cette méthode doit être appelée une fois par instanciation et est
+     * conçue pour être appelée lors du premier appel de get() sauf si le
+     * la configuration du modèle dit de ne pas l'appeler.
+     *
+     * @return  void
+     *
+     * @note    Appeler get() dans cette méthode résultera en une récursion.
+     */
+    protected function populateState() {
     }
 
 }
