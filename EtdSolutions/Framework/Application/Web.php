@@ -495,6 +495,9 @@ final class Web extends AbstractWebApplication {
         $this->getSession()
              ->start();
 
+        // On initialise l'état utilisateur.
+        $this->getSession()->set('state', new Registry);
+
         // On crée la session dans la base de données.
         $this->createDbSession();
 
@@ -504,6 +507,8 @@ final class Web extends AbstractWebApplication {
 
         // On définit les routes.
         $this->router->addMaps($this->get('routes', array()));
+
+
 
     }
 
