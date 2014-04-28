@@ -10,6 +10,7 @@
 
 namespace EtdSolutions\Framework\Model;
 
+use EtdSolutions\Framework\Application\Web;
 use Joomla\Database\DatabaseQuery;
 
 defined('_JEXEC') or die;
@@ -20,6 +21,13 @@ defined('_JEXEC') or die;
 abstract class ListModel extends Model {
 
     /**
+     * Champs de filtrage ou de tri valides.
+     *
+     * @var    array
+     */
+    protected $filter_fields = array();
+
+    /**
      * @var array Cache interne des données.
      */
     protected $cache = array();
@@ -28,6 +36,29 @@ abstract class ListModel extends Model {
      * @var DatabaseQuery Un cache interne pour la dernière requête utilisée.
      */
     protected $query;
+
+    /**
+     * Contexte dans lequel le modèle est instancié.
+     *
+     * @var    string
+     */
+    protected $context = null;
+
+    /**
+     * Instancie le modèle.
+     *
+     * @param Registry $state          L'état du modèle.
+     * @param bool     $ignore_request Utilisé pour ignorer la mise à jour de l'état depuis la requête.
+     */
+    public function __construct(Registry $state = null, $ignore_request = false) {
+
+        parent::__construct($state, $ignore_request);
+
+        // On devine le contexte suivant le nom du modèle.
+        if (empty($this->context)) {
+            $this->context = strtolower($this->getName());
+        }
+    }
 
     /**
      * Méthode pour obtenir un tableau des éléments.
@@ -47,7 +78,7 @@ abstract class ListModel extends Model {
         // On charge la liste des éléments.
         $query = $this->_getListQuery();
 
-        $this->db->setQuery($query, $this->getStart(), $this->getLimit());
+        $this->db->setQuery($query, $this->getStart(), $this->get('list.limit'));
         $items = $this->db->loadObjectList();
 
         // Add the items to the internal cache.
@@ -72,45 +103,16 @@ abstract class ListModel extends Model {
         }
 
         $start = $this->get('list.start');
-        $end = $this->get('list.end');
+        $limit = $this->get('list.limit');
         $total = $this->getTotal();
 
-        if ($start > $end) {
-            $start = $end;
-        }
-
-        if ($start > $total) {
-            $start = max(1, $total - $end);
+        if ($start > $total - $limit) {
+            $start = max(0, (int)(ceil($total / $limit) - 1) * $limit);
         }
 
         $this->cache[$store] = $start;
 
         return $this->cache[$store];
-    }
-
-    public function getLimit() {
-
-        $store = $this->getStoreId('getLimit');
-
-        // On essaye de charger les données depuis le cache si possible.
-        if (isset($this->cache[$store])) {
-            return $this->cache[$store];
-        }
-
-        $start = $this->getStart();
-        $end = $this->get('list.end');
-        $total = $this->getTotal();
-
-        $limit = $end - $start + 1;
-
-        if ($limit > $total) {
-            $limit = 0;
-        }
-
-        $this->cache[$store] = $limit;
-
-        return $this->cache[$store];
-
     }
 
     /**
@@ -131,7 +133,9 @@ abstract class ListModel extends Model {
         // On utilise le rapide COUNT(*) si there no GROUP BY or HAVING clause:
         if ($query instanceof DatabaseQuery && $query->type == 'select' && $query->group === null && $query->having === null) {
             $query = clone $query;
-            $query->clear('select')->clear('order')->select('COUNT(*)');
+            $query->clear('select')
+                  ->clear('order')
+                  ->select('COUNT(*)');
 
             $this->db->setQuery($query);
             $total = (int)$this->db->loadResult();
@@ -152,67 +156,13 @@ abstract class ListModel extends Model {
         return $this->cache[$store];
     }
 
-    public function parseRange($http_range=null) {
-
-        if (!isset($http_range)) {
-            $http_range = $_SERVER['HTTP_RANGE'];
-        }
-
-        $range = explode("-", str_replace("items=", "", $http_range));
-        $this->set('list.start', $range[0]);
-        $this->set('list.end', $range[1]);
-
-        return $this;
-    }
-
-    /**
-     * Méthode pour récupérer un objet contenant l'interval de sélection des données.
-     *
-     * @return  Object  Un objet représentant l'interval.
-     */
-    public function getContentRange() {
-
-        // Clé de stockage.
-        $store = $this->getStoreId('getContentRange');
-
-        // Depuis le cache ?
-        if (isset($this->cache[$store])) {
-            return $this->cache[$store];
-        }
-
-        $start = (int) $this->getStart();
-        $limit = (int) $this->get('list.limit');
-        $total = (int) $this->getTotal();
-        $end   = $start + $limit;
-
-        if ($limit > $total) {
-            $start = 0;
-        }
-
-        if (!$limit) {
-            $limit = $total;
-            $start = 0;
-        }
-
-        if ($start > $total - $limit) {
-            $start = max(0, (int) (ceil($total / $limit) - 1) * $limit);
-        }
-
-        if ($end > $total) {
-            $end = $total;
-        }
-
-        $this->cache[$store] = $start . '-' . $end . '/' . $total;
-
-        return $this->cache[$store];
-    }
-
     /**
      * Méthode pour récupérer un objet DatabaseQuery pour récupérer les données dans la base.
      *
      * @return  DatabaseQuery   Un objet DatabaseQuery.
      */
     protected function getListQuery() {
+
         return $this->db->getQuery(true);
     }
 
@@ -253,6 +203,62 @@ abstract class ListModel extends Model {
         }
 
         return $this->query;
+    }
+
+    /**
+     * Méthode pour définir automatiquement l'état du modèle.
+     *
+     * Cette méthode doit être appelée une fois par instanciation et est
+     * conçue pour être appelée lors du premier appel de get() sauf si le
+     * la configuration du modèle dit de ne pas l'appeler.
+     *
+     * @param   string $ordering  Un champ de tri optionnel.
+     * @param   string $direction Un direction de tri optionnelle (asc|desc).
+     *
+     * @return  void
+     *
+     * @note    Appeler get() dans cette méthode résultera en une récursion.
+     */
+    protected function populateState($ordering = null, $direction = null) {
+
+        $app = Web::getInstance();
+
+        // On reçoit et on définit les filtres.
+        if ($filters = $app->getUserStateFromRequest($this->context . '.filter', 'filter', array(), 'array')) {
+            foreach ($filters as $name => $value) {
+                $this->set('filter.' . $name, $value);
+            }
+        }
+
+        // Limites
+        $limit = $app->getUserStateFromRequest('global.list.limit', 'limit', $app->get('list_limit'), 'uint');
+        $this->set('list.limit', $limit);
+
+        // Check if the ordering field is in the white list, otherwise use the incoming value.
+        $value = $app->getUserStateFromRequest($this->context . '.ordercol', 'list_ordering', $ordering);
+
+        if (!in_array($value, $this->filter_fields)) {
+            $value = $ordering;
+            $app->setUserState($this->context . '.ordercol', $value);
+        }
+
+        $this->set('list.ordering', $value);
+
+        // Check if the ordering direction is valid, otherwise use the incoming value.
+        $value = $app->getUserStateFromRequest($this->context . '.orderdirn', 'list_direction', $direction);
+
+        if (!in_array(strtoupper($value), array(
+            'ASC',
+            'DESC',
+            ''
+        ))
+        ) {
+            $value = $direction;
+            $app->setUserState($this->context . '.orderdirn', $value);
+        }
+
+        $this->set('list.direction', $value);
+
     }
 
 }
