@@ -11,6 +11,7 @@
 namespace EtdSolutions\Framework\Model;
 
 use EtdSolutions\Framework\Application\Web;
+use EtdSolutions\Framework\Pagination\Pagination;
 use Joomla\Database\DatabaseQuery;
 
 defined('_JEXEC') or die;
@@ -157,6 +158,27 @@ abstract class ListModel extends Model {
     }
 
     /**
+     * Méthode pour donner un objet Pagination pour les données.
+     *
+     * @return  Pagination  Un objet Pagination.
+     */
+    public function getPagination() {
+
+        $store = $this->getStoreId('getPagination');
+
+        if (isset($this->cache[$store])) {
+            return $this->cache[$store];
+        }
+
+        // On crée l'objet pagination.
+        $pagination = new Pagination($this->getTotal(), $this->getStart(), $this->get('list.limit'));
+
+        $this->cache[$store] = $pagination;
+
+        return $this->cache[$store];
+    }
+
+    /**
      * Méthode pour récupérer un objet DatabaseQuery pour récupérer les données dans la base.
      *
      * @return  DatabaseQuery   Un objet DatabaseQuery.
@@ -231,7 +253,7 @@ abstract class ListModel extends Model {
         }
 
         // Limites
-        $limit = $app->getUserStateFromRequest('global.list.limit', 'limit', $app->get('list_limit'), 'uint');
+        $limit = $app->getUserStateFromRequest($this->context . '.limit', 'limit', $app->get('list_limit'), 'uint');
         $this->set('list.limit', $limit);
 
         // Check if the ordering field is in the white list, otherwise use the incoming value.
@@ -258,6 +280,11 @@ abstract class ListModel extends Model {
         }
 
         $this->set('list.direction', $value);
+
+        // Start
+        $value      = $app->getUserStateFromRequest($this->context . '.start', 'start', 0, 'uint');
+        $limitstart = (!empty($limit) ? (floor($value / $limit) * $limit) : 0);
+        $this->set('list.start', $limitstart);
 
     }
 

@@ -79,10 +79,11 @@ class User extends DataObject {
      * Méthode pour contrôler si l'utilisateur a le droit d'effectuer une action.
      *
      * @param   string $action Le nom de l'action a contrôler.
+     * @param   string $section La section sur laquelle on veut appliquer l'action.
      *
      * @return  boolean  True si autorisé, false sinon.
      */
-    public function authorise($action) {
+    public function authorise($action, $section) {
 
         //@TODO: faire un vrai check !!!!!!!!
         return true;
