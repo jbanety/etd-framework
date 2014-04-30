@@ -71,7 +71,6 @@ abstract class ListModel extends Model {
         // On récupère la clé de stockage.
         $store = $this->getStoreId();
 
-
         // On essaye de charger les données depuis le cache si possible.
         if (isset($this->cache[$store])) {
             return $this->cache[$store];
