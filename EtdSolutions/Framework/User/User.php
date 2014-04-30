@@ -10,6 +10,7 @@
 
 namespace EtdSolutions\Framework\User;
 
+use EtdSolutions\Framework\Application\Web;
 use EtdSolutions\Framework\Model\Model;
 use Joomla\Data\DataObject;
 use Joomla\Language\Text;
@@ -50,16 +51,22 @@ class User extends DataObject {
     /**
      * Retourne l'objet global User, en le créant seulement il n'existe pas déjà.
      *
-     * @param   integer $id L'utilisateur à charger
+     * @param   integer $id L'utilisateur à charger (optionnel). Si null renvoi l'utilisateur de la session courante.
      *
      * @return  User  L'objet User.
      */
-    public static function getInstance($id = 0) {
+    public static function getInstance($id = null) {
 
-        // Si l'id est zéro, on retourne un objet vide.
-        // Note: on ne met pas en cache cet utilisateur.
-        if ($id === 0) {
-            return new User;
+        // Si l'id est null on renvoi l'utilisateur de la session.
+        if (is_null($id)) {
+            $app = Web::getInstance();
+            $instance = $app->getSession()->get('user');
+
+            if (!($instance instanceof User)) {
+                return new User;
+            }
+
+           return $instance;
         }
 
         // On regarde si cet utilisateur est déjà en cache.
@@ -111,7 +118,7 @@ class User extends DataObject {
      *
      * @param   mixed $id The user id of the user to load
      *
-     * @return  object  Les données de l'utilisteur.
+     * @return  object  Les données de l'utilisateur.
      *
      * @throws  \RuntimeException
      */
