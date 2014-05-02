@@ -503,6 +503,7 @@ final class Web extends AbstractWebApplication {
 
         // On instancie le routeur.
         $this->router = new Router();
+        $this->router->setControllerPrefix($this->get('controller_prefix'));
         $this->router->setDefaultController($this->get('default_controller'));
 
         // On définit les routes.
