@@ -118,10 +118,13 @@ abstract class Controller extends AbstractController {
 
     public function display($view = null) {
 
+        // On récupère l'appli.
+        $app = $this->getApplication();
+
         // On définit la liste des espaces de noms dans laquelle la vue peut se trouver.
         $namespaces = array(
             '\\EtdSolutions\\Framework',
-            $this->getApplication()->get('app_namespace')
+            $app->get('app_namespace')
         );
 
         $className = "";
@@ -152,6 +155,10 @@ abstract class Controller extends AbstractController {
 
         // On instancie la vue.
         $view = new $className();
+
+        // On affecte le layout, si aucun n'est spécifié on prend le layout "default" par défaut.
+        $layout = $app->input->get('layout', 'default');
+        $view->setLayout($layout);
 
         try {
             $result = $view->render();
