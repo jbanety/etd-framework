@@ -10,6 +10,7 @@
 
 namespace EtdSolutions\Framework\User;
 
+use EtdSolutions\Framework\Application\Web;
 use EtdSolutions\Framework\Model\Model;
 use Joomla\Data\DataObject;
 use Joomla\Language\Text;
@@ -54,39 +55,66 @@ class User extends DataObject {
      *
      * @return  User  L'objet User.
      */
-    public static function getInstance($id = 0) {
+    public static function getInstance($id = null) {
 
-        // Si l'id est zéro, on retourne un objet vide.
-        // Note: on ne met pas en cache cet utilisateur.
-        if ($id === 0) {
-            return new User;
-        }
+        $app      = Web::getInstance();
+        $instance = $app->getSession()
+                        ->get('user');
 
-        // On regarde si cet utilisateur est déjà en cache.
-        if (empty(self::$instances[$id])) {
-            self::$instances[$id] = new User($id);
+        if (is_null($id)) {
+
+            if (!($instance instanceof User)) {
+                return new User;
+            }
+
+            return $instance;
+        } elseif (is_null($instance) || $instance->id != $id) {
+
+            // On regarde si cet utilisateur est déjà en cache.
+            if (empty(self::$instances[$id])) {
+                self::$instances[$id] = new User($id);
+            }
+
         }
 
         return self::$instances[$id];
     }
 
     public function isGuest() {
+
         $guest = $this->getProperty('guest');
+
         return ($guest == 1 || $guest === null);
     }
 
     /**
      * Méthode pour contrôler si l'utilisateur a le droit d'effectuer une action.
      *
-     * @param   string $action Le nom de l'action a contrôler.
+     * @param   string $action  Le nom de l'action a contrôler.
      * @param   string $section La section sur laquelle on veut appliquer l'action.
      *
      * @return  boolean  True si autorisé, false sinon.
      */
     public function authorise($action, $section) {
 
-        //@TODO: faire un vrai check !!!!!!!!
-        return true;
+        // On contruit le chemin dans le registre des droits.
+        $path = $section . "." . $action;
+
+        // On charge le registre.
+        $rights = $this->getProperty('rights');
+
+        // On contrôle que c'est bien un registre.
+        if ($rights instanceof Registry) {
+
+            // On récupère la valeur.
+            $right = $rights->get($path, false);
+
+            // On retourne la valeur en contrôllant qu'elle est bien égale à true.
+            return ($right === true);
+
+        }
+
+        return false;
 
     }
 
@@ -145,6 +173,7 @@ class User extends DataObject {
      * @see Model::getInstance
      */
     protected function getModel() {
+
         return Model::getInstance('User');
     }
 

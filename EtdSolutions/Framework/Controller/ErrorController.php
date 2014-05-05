@@ -10,10 +10,14 @@
 
 namespace EtdSolutions\Framework\Controller;
 
-use Joomla\Input\Input;
-
 defined('_JEXEC') or die;
 
 class ErrorController extends Controller {
+
+    public function canDo($action = null, $section = null) {
+
+        // On ne contrôle rien pour le controller des erreurs.
+        return true;
+    }
 
 }

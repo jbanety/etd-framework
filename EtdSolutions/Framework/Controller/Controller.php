@@ -11,9 +11,11 @@
 namespace EtdSolutions\Framework\Controller;
 
 use EtdSolutions\Framework\Application\Web;
+use EtdSolutions\Framework\User\User;
 use Joomla\Input\Input;
 use Joomla\Application\AbstractApplication;
 use Joomla\Controller\AbstractController;
+use Joomla\Language\Text;
 
 defined('_JEXEC') or die;
 
@@ -53,7 +55,8 @@ abstract class Controller extends AbstractController {
         parent::__construct($input, $app);
 
         // On charge le fichier de langue pour le controller.
-        $lang = $this->getApplication()->getLanguage();
+        $lang = $this->getApplication()
+                     ->getLanguage();
         $lang->load($this->getName());
 
         // Le nom de la vue par défaut est pris sur celui du controller.
@@ -118,6 +121,23 @@ abstract class Controller extends AbstractController {
 
     public function display($view = null) {
 
+        // Par défaut, les vues ne sont disponibles qu'aux utilisateurs authentifiés.
+        $user = User::getInstance();
+        if ($user->isGuest()) {
+            $this->redirect('/login', Text::_('APP_ERROR_MUST_BE_LOGGED'), 'warning');
+        }
+
+        // On contrôle les droits d'accès.
+        if (!$this->canDo()) {
+            throw new \RuntimeException(Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 403);
+        }
+
+        return $this->renderView($view);
+
+    }
+
+    protected function renderView($view = null) {
+
         // On récupère l'appli.
         $app = $this->getApplication();
 
@@ -130,7 +150,7 @@ abstract class Controller extends AbstractController {
         $className = "";
 
         // On cherche la vue dans ces espaces de nom.
-        foreach($namespaces as $namespace) {
+        foreach ($namespaces as $namespace) {
 
             // On crée le nom de la classe.
             if (isset($view)) {
@@ -177,9 +197,7 @@ abstract class Controller extends AbstractController {
      *
      * @param   string $method The name of the method in the derived class to perform if a named task is not found.
      *
-     * @return  JControllerLegacy  A JControllerLegacy object to support chaining.
-     *
-     * @since   12.2
+     * @return  Controller  A JControllerLegacy object to support chaining.
      */
     public function registerDefaultTask($method) {
 
@@ -194,9 +212,7 @@ abstract class Controller extends AbstractController {
      * @param   string $task   The task.
      * @param   string $method The name of the method in the derived class to perform for this task.
      *
-     * @return  JControllerLegacy  A JControllerLegacy object to support chaining.
-     *
-     * @since   12.2
+     * @return  Controller  A JControllerLegacy object to support chaining.
      */
     public function registerTask($task, $method) {
 
@@ -212,9 +228,7 @@ abstract class Controller extends AbstractController {
      *
      * @param   string $task The task.
      *
-     * @return  JControllerLegacy  This object to support chaining.
-     *
-     * @since   12.2
+     * @return  Controller  This object to support chaining.
      */
     public function unregisterTask($task) {
 
@@ -252,7 +266,7 @@ abstract class Controller extends AbstractController {
     public function getName() {
 
         if (empty($this->name)) {
-            $r = null;
+            $r         = null;
             $classname = join('', array_slice(explode('\\', get_class($this)), -1));
             if (!preg_match('/(.*)Controller/i', $classname, $r)) {
                 throw new \RuntimeException('Unable to detect controller name', 500);
@@ -261,6 +275,47 @@ abstract class Controller extends AbstractController {
         }
 
         return $this->name;
+    }
+
+    /**
+     * Méthode pour contrôler les droits d'accès de l'utilisateur pour une action.
+     *
+     * @param string $action  L'action à tester.
+     * @param string $section La section sur laquelle l'action est faite.
+     *
+     * @return bool True si ok, false sinon.
+     *
+     * @note Cette méthode est un proxy pour User::authorise();
+     */
+    public function canDo($action = null, $section = null) {
+
+        $user = User::getInstance();
+
+        // Si on a pas d'action, on devine.
+        if (empty($action)) {
+
+            // On initialisation les variables.
+            $action = 'view';
+            $layout = $this->getInput()->get('layout', 'default');
+
+            switch ($layout) {
+                case 'edit':
+                    // Action de modification.
+                    $action = 'edit';
+                    break;
+                default:
+                    // rien de spécial
+                    break;
+            }
+        }
+
+        // Si on a pas de section, on prend le nom du controller.
+        if (empty($section)) {
+            $section = strtolower($this->getName());
+        }
+
+        return $user->authorise($action, $section);
+
     }
 
 }

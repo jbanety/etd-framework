@@ -13,6 +13,7 @@ namespace EtdSolutions\EtdDirect\Model;
 use EtdSolutions\Framework\Model\ItemModel;
 use Joomla\Database\DatabaseQuery;
 use Joomla\Language\Text;
+use Joomla\Registry\Registry;
 
 class UserModel extends ItemModel {
 
@@ -35,6 +36,12 @@ class UserModel extends ItemModel {
         );
 
         $item = $db->loadObject();
+
+        // On charge les droits.
+        if (!empty($item->rights) && is_string($item->rights)) {
+            $rights = new Registry($item->rights);
+            $item->rights = $rights;
+        }
 
         return $item;
 
