@@ -16,7 +16,6 @@ use EtdSolutions\Framework\Toolbar\Button\ButtonGroup;
 use EtdSolutions\Framework\Toolbar\Button\ButtonDropdownSingle;
 
 
-
 defined('_JEXEC') or die;
 
 
@@ -53,7 +52,7 @@ class Toolbar {
      * @return Button   objet de type bouton
      */
 
-    public static function createButton($label, $url, $class = 'btn btn-default', $onclick = '', $disabled = false){
+    public static function createButton($label, $url, $class = '', $onclick = '', $disabled = false){
 
         $button = new Button($label, $url, $class, $onclick, $disabled);
 
@@ -103,6 +102,7 @@ class Toolbar {
 
         return $button;
     }
+
 
 
     /**

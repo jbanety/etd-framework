@@ -16,7 +16,7 @@ use Joomla\Language\Text;
 defined('_JEXEC') or die;
 
 
-class ButtonGroup extends ButtonDropdownSingle{
+class ButtonGroup extends Button{
 
     /**
      * @var array Les boutons du btn-group
@@ -34,13 +34,12 @@ class ButtonGroup extends ButtonDropdownSingle{
     public function render(){
 
         $html='';
-        $html.='<div id="" class="btn-group"> ';
+        $html.='<div class="btn-group btn-toolbar"> ';
 
         foreach($this->components as $component){
 
-
-            //$html.='<button id="" class="' . $component->class . '"> ' . Text::_($component->label) . '</button>';
             $html.=$component->render();
+
         }
 
         $html.='</div>';

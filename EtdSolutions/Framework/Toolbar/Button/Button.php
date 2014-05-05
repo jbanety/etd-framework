@@ -44,7 +44,17 @@ class Button {
 
 
     public function render(){
-        $html='<button id="" class="' . $this->class . '" onclick="location.href='.$this->url.'"> ' . Text::_($this->label) . '</button>';
+        $html='<a ';
+
+        if($this->url != ''){
+            $html .='href="'.$this->url.'"';
+        }
+
+        if($this->class != ''){
+            $html .='class="'.$this->class.'"';
+        }
+
+        $html .= '> ' . Text::_($this->label) . ' </a>';
 
         return $html;
     }
