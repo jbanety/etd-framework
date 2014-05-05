@@ -49,11 +49,22 @@ class ButtonDropdownSingle extends Button {
     public function render(){
 
 
-        $html='<div class="btn-group"><button type="button" class="' . $this->class . ' dropdown-toggle" data-toggle="dropdown" onclick="location.href='.$this->url.'">'. Text::_($this->label) . '
-                <span class="caret"></span>
-                </button><ul class="dropdown-menu" role="menu">';
+        $html='<div class="btn-group btn-toolbar"><a type="button" ';
+
+        if($this->class !=''){
+            $html .= 'class="' . $this->class . ' dropdown-toggle" ';
+        }
+
+        $html .= 'dropdown-toggle" data-toggle="dropdown" >';
+
+        if($this->label != ''){
+            $html .= Text::_($this->label);
+        }
+        $html .='<span class="caret"></span>
+                 </a><ul class="dropdown-menu pull-right" role="menu">';
+
         foreach($this->links as $link){
-            $html.='<li><a href="'.$link['url'].'">'.Text::_($link['label']).'</a></li>';
+            $html.= '<li>'.$link->render().'</li>';
         }
         $html.='</ul></div>';
 

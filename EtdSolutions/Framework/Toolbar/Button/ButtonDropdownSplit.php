@@ -51,14 +51,33 @@ class ButtonDropdownSplit extends Button {
 
     public function render(){
 
-        $html='<div class="btn-group">';
-        $html.='<button type="button" class="' . $this->class . '">'. Text::_($this->label) . '</button>
-                <button type="button" class="' . $this->class . ' dropdown-toggle" data-toggle="dropdown">
-                <span class="caret"></span>
+        $html='<div class="btn-group btn-toolbar">';
+        $html.='<a type="button"';
+        if($this->class !=''){
+            $html .='class="' . $this->class . '">';
+        }
+
+        if($this->label !=''){
+            $html .= Text::_($this->label);
+        }
+
+        $html .='</a>
+                <a type="button" ';
+
+        if($this->class !=''){
+            $html .='class="' . $this->class . ' dropdown-toggle"';}
+
+        else {
+            $html .='class="dropdown-toggle"';
+        }
+
+        $html .=  ' data-toggle="dropdown">';
+        $html .= '<span class="caret"></span>
                 <span class="sr-only">Toggle Dropdown</span>
-                </button><ul class="dropdown-menu" role="menu">';
+                </a><ul class="dropdown-menu" role="menu">';
+
         foreach($this->links as $link){
-            $html.='<li><a href="'.$link['url'].'">'.Text::_($link['label']).'</a></li>';
+            $html.= '<li>'.$link->render().'</li>';
         }
         $html.='</ul></div>';
 
