@@ -490,13 +490,14 @@ final class Web extends AbstractWebApplication {
         )));
 
         // On initialise la session.
-        $this->getSession()
-             ->initialise($this->input);
-        $this->getSession()
-             ->start();
+        $session = $this->getSession();
+        $session->initialise($this->input);
+        $session->start();
 
         // On initialise l'état utilisateur.
-        $this->getSession()->set('state', new Registry);
+        if ($session->isNew()) {
+            $session->set('state', new Registry);
+        }
 
         // On crée la session dans la base de données.
         $this->createDbSession();
