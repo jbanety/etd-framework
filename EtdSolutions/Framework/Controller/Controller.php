@@ -303,6 +303,11 @@ abstract class Controller extends AbstractController {
                     // Action de modification.
                     $action = 'edit';
                     break;
+                case 'delete':
+                    // Action de suppression.
+                    $action = 'delete';
+                    break;
+
                 default:
                     // rien de spécial
                     break;
