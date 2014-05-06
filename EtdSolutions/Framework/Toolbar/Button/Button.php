@@ -41,6 +41,34 @@ class Button {
      */
     protected $disabled = false;
 
+    /**
+     * @return string
+     */
+    public function getLabel()
+    {
+
+        return $this->label;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl()
+    {
+
+        return $this->url;
+    }
+
+    /**
+     * @param string $class
+     */
+    public function setClass($class)
+    {
+
+        $this->class = $class;
+    }
+
+
 
 
     public function render(){
