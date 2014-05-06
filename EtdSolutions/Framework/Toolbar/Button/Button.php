@@ -41,6 +41,8 @@ class Button {
      */
     protected $disabled = false;
 
+    protected $logo = '';
+
     /**
      * @return string
      */
@@ -68,6 +70,35 @@ class Button {
         $this->class = $class;
     }
 
+    /**
+     * @return string
+     */
+    public function getClass()
+    {
+
+        return $this->class;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOnclick()
+    {
+
+        return $this->onclick;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIcon()
+    {
+
+        return $this->icon;
+    }
+
+
+
 
 
 
@@ -79,15 +110,24 @@ class Button {
         }
 
         if($this->class != ''){
-            $html .='class="'.$this->class.'"';
+            $html .='class="btn btn-'.$this->class.'"';
         }
 
-        $html .= '> ' . Text::_($this->label) . ' </a>';
+        if($this->onclick != ''){
+            $html .='onclick="'.$this->onclick.'"';
+        }
+
+
+        $html .= '> ';
+        if ($this->icon !=''){
+            $html .='<span class="fa fa-'.$this->icon.'"></span>&nbsp;';
+        }
+        $html .= Text::_($this->label) . ' </a>';
 
         return $html;
     }
 
-    function __construct($label, $url, $class = '', $onclick = '', $disabled = false)
+    function __construct($label, $url, $class = '',$icon = '' , $onclick = '', $disabled = false)
     {
 
         $this->class    = $class;
@@ -95,6 +135,7 @@ class Button {
         $this->label    = $label;
         $this->onclick  = $onclick;
         $this->url      = $url;
+        $this->icon     = $icon;
     }
 
 }

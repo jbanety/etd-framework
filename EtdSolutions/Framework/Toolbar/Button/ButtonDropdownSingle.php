@@ -16,54 +16,33 @@ defined('_JEXEC') or die;
 
 class ButtonDropdownSingle extends Button {
 
-    /**
-     * @var string $label Le texte du bouton
-     */
-    protected $label = '';
-
-    /**
-     * @var string $class Classe CSS
-     */
-    protected $class = '';
-
-    /**
-     * @var string $url url bouton
-     */
-    protected $url = '';
-
-    /**
-     * @var string $onclick action du bouton
-     */
-    protected $onclick = '';
-
-    /**
-     * @var bool $disabled Si True le bouton est désactivé. False par défaut.
-     */
-    protected $disabled = false;
 
     /**
      * @var array $links tableau avec les sous boutons et leur lien
      */
     protected $links = array();
 
+    protected $button ='';
+
     public function render(){
 
 
         $html='<div class="btn-group btn-toolbar"><a type="button" ';
 
-        if($this->class !=''){
-            $html .= 'class="' . $this->class . ' dropdown-toggle" ';
+        if($this->button->class !=''){
+            $html .= 'class="btn btn-' . $this->button->getClass() . ' dropdown-toggle" ';
         }
 
         $html .= 'dropdown-toggle" data-toggle="dropdown" >';
 
-        if($this->label != ''){
-            $html .= Text::_($this->label);
+        if($this->button->label != ''){
+            $html .= Text::_($this->button->getLabel());
         }
         $html .='<span class="caret"></span>
                  </a><ul class="dropdown-menu pull-right" role="menu">';
 
         foreach($this->links as $link){
+            $link->setClass('');
             $html.= '<li>'.$link->render().'</li>';
         }
         $html.='</ul></div>';
@@ -72,15 +51,13 @@ class ButtonDropdownSingle extends Button {
         return $html;
     }
 
-    function __construct($label, $url, $links, $class = '', $onclick = '', $disabled = false)
+
+    function __construct($button, $links)
     {
 
-        $this->class    = $class;
-        $this->disabled = $disabled;
-        $this->label    = $label;
-        $this->onclick  = $onclick;
-        $this->url      = $url;
-        $this->links    = $links;
+        $this->button = $button;
+        $this->links  = $links;
     }
+
 
 }

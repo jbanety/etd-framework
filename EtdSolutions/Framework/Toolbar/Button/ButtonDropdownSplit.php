@@ -20,55 +20,46 @@ defined('_JEXEC') or die;
 class ButtonDropdownSplit extends Button {
 
     /**
-     * @var string $label Le texte du bouton
-     */
-    protected $label = '';
-
-    /**
-     * @var string $class Classe CSS
-     */
-    protected $class = '';
-
-    /**
-     * @var string $url url bouton
-     */
-    protected $url = '';
-
-    /**
-     * @var string $onclick action du bouton
-     */
-    protected $onclick = '';
-
-    /**
-     * @var bool $disabled Si True le bouton est désactivé. False par défaut.
-     */
-    protected $disabled = false;
-
-    /**
      * @var array $links tableau avec les sous boutons et leur lien
      */
     protected $links = array();
 
+    protected $button = '';
+
     public function render(){
+
+
 
         $html='<div class="btn-group btn-toolbar">';
         $html.='<a type="button"';
-        if($this->class !=''){
-            $html .='class="' . $this->class . '">';
+        if($this->button->class !=''){
+            $html .='class="btn btn-' . $this->button->getClass().'"';
+        }
+        else{
+            $html .='class="btn btn-success"';
         }
 
-        if($this->label !=''){
-            $html .= Text::_($this->label);
+        if($this->button->onclick !=''){
+            $html .='onclick="' . $this->button->getOnclick() .'"';
+        }
+        $html .= '>';
+
+        if($this->button->icon !=''){
+            $html .='<span class="fa fa-'.$this->button->getIcon().'"></span>&nbsp';
+        }
+
+        if($this->button->label !=''){
+            $html .= Text::_($this->button->getLabel());
         }
 
         $html .='</a>
                 <a type="button" ';
 
-        if($this->class !=''){
-            $html .='class="' . $this->class . ' dropdown-toggle"';}
+        if($this->button->class !=''){
+            $html .='class="btn btn-' . $this->button->getClass() . ' dropdown-toggle"';}
 
         else {
-            $html .='class="dropdown-toggle"';
+            $html .='class="btn btn-success dropdown-toggle"';
         }
 
         $html .=  ' data-toggle="dropdown">';
@@ -77,6 +68,7 @@ class ButtonDropdownSplit extends Button {
                 </a><ul class="dropdown-menu" role="menu">';
 
         foreach($this->links as $link){
+            $link->setClass('');
             $html.= '<li>'.$link->render().'</li>';
         }
         $html.='</ul></div>';
@@ -85,15 +77,11 @@ class ButtonDropdownSplit extends Button {
         return $html;
     }
 
-    function __construct($label, $url, $links, $class = '', $onclick = '', $disabled = false)
+    function __construct($links, $button)
     {
 
-        $this->class    = $class;
-        $this->disabled = $disabled;
-        $this->label    = $label;
-        $this->onclick  = $onclick;
-        $this->url      = $url;
-        $this->links    = $links;
+        $this->button = $button;
+        $this->links  = $links;
     }
 
 }

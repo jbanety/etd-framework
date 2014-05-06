@@ -52,9 +52,9 @@ class Toolbar {
      * @return Button   objet de type bouton
      */
 
-    public static function createButton($label, $url, $class = '', $onclick = '', $disabled = false){
+    public static function createButton($label, $url, $class = '', $icon='', $onclick = '', $disabled = false){
 
-        $button = new Button($label, $url, $class, $onclick, $disabled);
+        $button = new Button($label, $url, $class, $icon, $onclick, $disabled);
 
         return $button;
 
@@ -80,11 +80,13 @@ class Toolbar {
      * @param bool $disabled    Cacher un bouton (pas implémenté)
      * @return ButtonDropdownSplit      objet de type bouton
      */
-    public static function createButtonDropdownSplit($label, $url, $links=array(), $class = 'btn btn-default', $onclick = '', $disabled = false){
+   public static function createButtonDropdownSplit($links, $button=null){
 
-        $button = new ButtonDropdownSplit($label, $url, $links, $class, $onclick, $disabled);
+        if (is_null($button)) {
+            $button = array_shift($links);
+        }
 
-        return $button;
+        return new ButtonDropdownSplit($links, $button);
     }
 
     /**
@@ -96,11 +98,14 @@ class Toolbar {
      * @param bool $disabled    Cacher un bouton (pas implémenté)
      * @return ButtonDropdownSingle      objet de type bouton
      */
-    public static function createButtonDropdownSingle($label, $url, $links=array(), $class = 'btn btn-default', $onclick = '', $disabled = false){
+    public static function createButtonDropdownSingle($links, $button=null){
 
-        $button = new ButtonDropdownSingle($label, $url, $links, $class, $onclick, $disabled);
+        if (is_null($button)) {
+            $button = array_shift($links);
+        }
 
-        return $button;
+
+        return new ButtonDropdownSingle($links, $button);
     }
 
 
