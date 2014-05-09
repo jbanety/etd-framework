@@ -109,6 +109,10 @@ class Button {
             $html .='href="'.$this->url.'"';
         }
 
+        if($this->id != ''){
+            $html .='id="'.$this->id.'"';
+        }
+
         if($this->class != ''){
             $html .='class="btn btn-'.$this->class.'"';
         }
@@ -127,7 +131,7 @@ class Button {
         return $html;
     }
 
-    function __construct($label, $url, $class = '',$icon = '' , $onclick = '', $disabled = false)
+    function __construct($label, $url, $id, $class = '',$icon = '' , $onclick = '', $disabled = false)
     {
 
         $this->class    = $class;
@@ -136,6 +140,7 @@ class Button {
         $this->onclick  = $onclick;
         $this->url      = $url;
         $this->icon     = $icon;
+        $this->id       = $id;
     }
 
 }

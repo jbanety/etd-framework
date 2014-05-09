@@ -32,6 +32,11 @@ class ButtonDropdownSplit extends Button {
 
         $html='<div class="btn-group btn-toolbar">';
         $html.='<a type="button"';
+
+        if($this->button->url !=''){
+            $html .='href="'.$this->button->getUrl().'"';
+        }
+
         if($this->button->class !=''){
             $html .='class="btn btn-' . $this->button->getClass().'"';
         }

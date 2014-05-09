@@ -11,6 +11,7 @@
 namespace EtdSolutions\Framework\Controller;
 
 use EtdSolutions\Framework\Application\Web;
+use EtdSolutions\Framework\Model\Model;
 use EtdSolutions\Framework\User\User;
 use Joomla\Input\Input;
 use Joomla\Application\AbstractApplication;
@@ -35,6 +36,11 @@ abstract class Controller extends AbstractController {
     protected $doTask;
 
     protected $tasks;
+
+    /**
+     * @var $defaultModel string Le nom du model par défaut.
+     */
+    protected $defaultModel;
 
     /**
      * Instancie le controller.
@@ -87,6 +93,9 @@ abstract class Controller extends AbstractController {
 
         $this->registerDefaultTask($this->defaultTask);
 
+        // On détermine le modèle par défaut grâce au nom du controller.
+        $this->defaultModel = $this->getName();
+
     }
 
     /**
@@ -128,9 +137,9 @@ abstract class Controller extends AbstractController {
         }
 
         // On contrôle les droits d'accès.
-        if (!$this->canDo()) {
+        /*if (!$this->canDo()) {
             throw new \RuntimeException(Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 403);
-        }
+        }*/
 
         return $this->renderView($view);
 
@@ -299,9 +308,14 @@ abstract class Controller extends AbstractController {
             $layout = $this->getInput()->get('layout', 'default');
 
             switch ($layout) {
-                case 'edit':
-                    // Action de modification.
-                    $action = 'edit';
+                case 'form':
+
+                    if ($this->doTask == "add") {
+                        $action = "create";
+                    } elseif ($this->doTask == "edit") {
+                        $action = "edit";
+                    }
+
                     break;
                 case 'delete':
                     // Action de suppression.
@@ -320,6 +334,27 @@ abstract class Controller extends AbstractController {
         }
 
         return $user->authorise($action, $section);
+
+    }
+
+    /**
+     * Méthode pour charger un model.
+     *
+     * @param string $model Le nom du modèle. Facultatif.
+     *
+     * @return Model Le modèle.
+     *
+     * @throws \RuntimeException
+     */
+    protected function getModel($model = null) {
+
+        if (!isset($model) && isset($this->defaultModel)) {
+            $name = ucfirst($this->defaultModel);
+        } else {
+            throw new \RuntimeException("Unable to find a model", 500);
+        }
+
+        return Model::getInstance($name);
 
     }
 

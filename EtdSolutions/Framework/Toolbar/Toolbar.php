@@ -52,9 +52,9 @@ class Toolbar {
      * @return Button   objet de type bouton
      */
 
-    public static function createButton($label, $url, $class = '', $icon='', $onclick = '', $disabled = false){
+    public static function createButton($label, $url, $id, $class = '', $icon='', $onclick = '', $disabled = false){
 
-        $button = new Button($label, $url, $class, $icon, $onclick, $disabled);
+        $button = new Button($label, $url, $id, $class, $icon, $onclick, $disabled);
 
         return $button;
 

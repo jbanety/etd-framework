@@ -407,6 +407,7 @@ final class Web extends AbstractWebApplication {
         $this->setHeader('status', $status);
         $this->setError($message, $code, $exception);
         $controller = new ErrorController();
+        $this->input->set('layout', 'default');
         $this->setBody($controller->execute());
         $this->respond();
         $this->close();
@@ -503,7 +504,7 @@ final class Web extends AbstractWebApplication {
         $this->createDbSession();
 
         // On instancie le routeur.
-        $this->router = new Router();
+        $this->router = new Router($this->input);
         $this->router->setControllerPrefix($this->get('controller_prefix'));
         $this->router->setDefaultController($this->get('default_controller'));
 

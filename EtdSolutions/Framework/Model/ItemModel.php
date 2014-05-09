@@ -12,6 +12,10 @@ namespace EtdSolutions\Framework\Model;
 
 use EtdSolutions\Framework\Application\Web;
 use Joomla\Database\DatabaseQuery;
+use Joomla\Filesystem\Path;
+use Joomla\Form\Form;
+use Joomla\Form\FormHelper;
+use Joomla\Language\Text;
 use Joomla\Registry\Registry;
 
 defined('_JEXEC') or die;
@@ -75,6 +79,84 @@ abstract class ItemModel extends Model {
 
     }
 
+    public function getForm($name=null, array $options = array()) {
+
+        if (!isset($name)) {
+            $name = $this->getName();
+        }
+
+
+
+        // On compile un identifiant de cache.
+        $store = md5("getForm:" . $name . ":" . serialize($options));
+
+        if (isset($this->cache[$store])) {
+            return $this->cache[$store];
+        }
+
+        if (!isset($options['control'])) {
+            $options['control'] = 'etdform';
+        }
+
+        // On instancie le formulaire.
+        $form = new Form($name, $options);
+
+        // On ajoute le chemin vers les fichiers XML.
+        FormHelper::addFormPath(JPATH_FORMS);
+
+        // On ajoute le chemin vers les types de champs.
+        $app = Web::getInstance();
+        $path = Path::clean(JPATH_LIBRARIES . $app->get('app_namespace') . "/Form");
+        FormHelper::addFieldPath($path);
+
+        // On charge les champs depuis le XML.
+        if (!$form->loadFile($name)) {
+            throw new \RuntimeException(Text::_('APP_ERROR_FORM_NOT_LOADED'), 500);
+        }
+
+        // On charge les données si nécessaire.
+        $data = $this->loadFormData($options);
+
+        // On les lie au formulaire.
+        if (!empty($data)) {
+            $form->bind($data);
+        }
+
+        // On ajoute l'élement au cache.
+        $this->cache[$store] = $form;
+
+        return $this->cache[$store];
+
+    }
+
+    public function validate($data) {
+
+        // $form->validate($data);
+
+    }
+
+    public function filter($data) {
+
+        // $form->filter($data);
+
+    }
+
+    protected function loadFormData($options=array()) {
+
+        $app = Web::getInstance();
+
+        // Je tente les charger les données depuis la session.
+        $data = $app->getUserStateFromRequest($this->context.'.edit.data', 'etdform', array(), 'array');
+
+        // Si on a pas de données, on charge celle de l'abonné si on a est en édition.
+        if (empty($data) && $this->get('subscriber.id')) {
+            $data = $this->getItem();
+        }
+
+        return $data;
+
+    }
+
     /**
      * Méthode pour charger un élément.
      * Elle doit être implémentée dans chaque modèle.
@@ -84,7 +166,6 @@ abstract class ItemModel extends Model {
      * @return mixed
      */
     abstract protected function loadItem($id);
-
     /**
      * Méthode pour définir automatiquement l'état du modèle.
      */
@@ -94,7 +175,8 @@ abstract class ItemModel extends Model {
 
         // Load the object state.
         $id = $app->input->get('id', 0, 'int');
-        $this->setState($this->context . '.id', $id);
+        $this->set($this->context . '.id', $id);
     }
+
 
 }
