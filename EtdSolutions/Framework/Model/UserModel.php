@@ -8,11 +8,8 @@
  * @author      ETD Solutions http://etd-solutions.com
  */
 
-namespace EtdSolutions\EtdDirect\Model;
+namespace EtdSolutions\Framework\Model;
 
-use EtdSolutions\Framework\Model\ItemModel;
-use Joomla\Database\DatabaseQuery;
-use Joomla\Language\Text;
 use Joomla\Registry\Registry;
 
 class UserModel extends ItemModel {
