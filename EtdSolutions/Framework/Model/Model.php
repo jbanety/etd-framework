@@ -72,8 +72,8 @@ abstract class Model extends AbstractDatabaseModel {
 
             // On définit la liste des espaces de noms dans laquelle le modèle peut se trouver.
             $namespaces = array(
-                '\\EtdSolutions\\Framework',
-                Web::getInstance()->get('app_namespace')
+                Web::getInstance()->get('app_namespace'),
+                '\\EtdSolutions\\Framework'
             );
 
             $className = "";
