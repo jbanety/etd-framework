@@ -19,7 +19,7 @@ defined('_JEXEC') or die;
 /**
  * Modèle de base
  */
-abstract class ListModel extends Model {
+abstract class ItemsModel extends Model {
 
     /**
      * Champs de filtrage ou de tri valides.

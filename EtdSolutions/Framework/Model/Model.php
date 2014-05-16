@@ -59,16 +59,19 @@ abstract class Model extends AbstractDatabaseModel {
     /**
      * Méthode pour récupérer une instance d'un modèle, la créant si besoin.
      *
-     * @param   string $name Le nom du modèle
+     * @param   string $name            Le nom du modèle
+     * @param   bool   $ignore_request  Utilisé pour ignorer la mise à jour de l'état depuis l'input.
      *
-     * @return  mixed  L'instance.
+     * @return  Model  L'instance.
      *
      * @throws   \RuntimeException
      */
-    public static function getInstance($name) {
+    public static function getInstance($name, $ignore_request = false) {
 
         $name = ucfirst($name);
-        if (empty(self::$instance[$name])) {
+        $store = md5($name.":".(int)$ignore_request);
+
+        if (empty(self::$instance[$store])) {
 
             // On définit la liste des espaces de noms dans laquelle le modèle peut se trouver.
             $namespaces = array(
@@ -81,7 +84,7 @@ abstract class Model extends AbstractDatabaseModel {
             // On cherche le modèle dans ces espaces de nom.
             foreach ($namespaces as $namespace) {
 
-                $className = $namespace . '\\Model\\' . ucfirst($name) . 'Model';
+                $className = $namespace . '\\Model\\' . $name . 'Model';
 
                 // Si on a trouvé la classe, on arrête.
                 if (class_exists($className)) {
@@ -89,16 +92,16 @@ abstract class Model extends AbstractDatabaseModel {
                 }
 
             }
-
             // On vérifie que l'on a bien une classe valide.
             if (!class_exists($className)) {
                 throw new \RuntimeException("Unable find model " . $name, 500);
             }
 
-            self::$instance[$name] = new $className;
+            self::$instance[$store] = new $className(null, $ignore_request);
         }
 
-        return self::$instance[$name];
+
+        return self::$instance[$store];
     }
 
     /**
@@ -196,5 +199,7 @@ abstract class Model extends AbstractDatabaseModel {
      */
     protected function populateState() {
     }
+
+
 
 }
