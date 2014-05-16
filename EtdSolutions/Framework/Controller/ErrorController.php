@@ -14,10 +14,10 @@ defined('_JEXEC') or die;
 
 class ErrorController extends Controller {
 
-    public function canDo($action = null, $section = null) {
+    public function display($view = null) {
 
-        // On ne contrôle rien pour le controller des erreurs.
-        return true;
+        return $this->renderView($view);
+
     }
 
 }
