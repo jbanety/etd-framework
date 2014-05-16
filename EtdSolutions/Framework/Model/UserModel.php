@@ -47,4 +47,8 @@ class UserModel extends ItemModel {
 
     }
 
+    protected function loadAdditionalItem($id, $idCompany)
+    {
+        // TODO: Implement loadAdditionalItem() method.
+    }
 }

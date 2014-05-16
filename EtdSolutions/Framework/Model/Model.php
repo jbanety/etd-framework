@@ -36,6 +36,11 @@ abstract class Model extends AbstractDatabaseModel {
     protected $name;
 
     /**
+     * @var array Un tableau des erreurs.
+     */
+    protected $errors = array();
+
+    /**
      * Instancie le modèle.
      *
      * @param Registry $state          L'état du modèle.
@@ -164,6 +169,18 @@ abstract class Model extends AbstractDatabaseModel {
         }
 
         return $this->name;
+    }
+
+    public function getErrors() {
+        return $this->errors;
+    }
+
+    public function setErrors($errors) {
+        $this->errors = $errors;
+    }
+
+    public function setError($error) {
+        $this->errors[] = $error;
     }
 
     /**

@@ -34,6 +34,7 @@ abstract class ItemModel extends Model {
 
     /**
      * Cache interne des données.
+     * Cache interne des données.
      *
      * @var array
      */
@@ -79,13 +80,17 @@ abstract class ItemModel extends Model {
 
     }
 
+    /**
+     * @param null $name
+     * @param array $options
+     * @return Form
+     * @throws \RuntimeException
+     */
     public function getForm($name=null, array $options = array()) {
 
         if (!isset($name)) {
             $name = $this->getName();
         }
-
-
 
         // On compile un identifiant de cache.
         $store = md5("getForm:" . $name . ":" . serialize($options));
@@ -114,6 +119,9 @@ abstract class ItemModel extends Model {
             throw new \RuntimeException(Text::_('APP_ERROR_FORM_NOT_LOADED'), 500);
         }
 
+        // On modifie le formulaire si besoin.
+        $form = $this->preprocessForm($form);
+
         // On charge les données si nécessaire.
         $data = $this->loadFormData($options);
 
@@ -129,15 +137,35 @@ abstract class ItemModel extends Model {
 
     }
 
+    /**
+     * Méthode pour modifier le formulaire avant la liaison avec les données.
+     *
+     * @param Form $form
+     * @return Form
+     */
+    protected function preprocessForm(Form $form) {
+        return $form;
+    }
+
     public function validate($data) {
 
-        // $form->validate($data);
+        $form =$this->getForm();
+        $ret = $form->validate($data);
 
+        // Si le form n'est pas valide, on stocke les erreurs dans le modèle.
+        if ($ret === false) {
+            $this->setErrors($form->getErrors());
+        }
+
+        return $ret;
     }
 
     public function filter($data) {
 
-        // $form->filter($data);
+        $form = $this->getForm();
+        $data = $form->filter($data);
+
+        return $data;
 
     }
 
@@ -166,6 +194,7 @@ abstract class ItemModel extends Model {
      * @return mixed
      */
     abstract protected function loadItem($id);
+
     /**
      * Méthode pour définir automatiquement l'état du modèle.
      */

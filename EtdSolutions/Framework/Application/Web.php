@@ -77,6 +77,19 @@ final class Web extends AbstractWebApplication {
     }
 
     /**
+     * Retourne l'input
+     *
+     * @return \Joomla\Input\Input
+     */
+    public function getInput()
+    {
+
+        return $this->input;
+    }
+
+
+
+    /**
      * Retourne une référence à l'objet global Web, en le créant seulement si besoin.
      *
      * @return  Web

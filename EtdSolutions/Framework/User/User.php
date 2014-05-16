@@ -25,6 +25,7 @@ class User extends DataObject {
      */
     protected static $instances = array();
 
+
     /**
      * Instancie l'objet utilisateur.
      *
