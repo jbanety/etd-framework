@@ -15,42 +15,32 @@ use Joomla\Language\Text;
 
 defined('_JEXEC') or die;
 
-
-class ButtonGroup extends Button{
+class ButtonGroup {
 
     /**
      * @var array Les boutons du btn-group
      */
     protected $components = array();
 
-    function __construct(array $components)
-    {
+    function __construct(array $components) {
 
         $this->components = $components;
 
     }
 
+    public function render() {
 
-    public function render(){
+        $html = '<div class="btn-group"> ';
 
-        $html='';
-        $html.='<div class="btn-group btn-toolbar"> ';
+        foreach ($this->components as $component) {
 
-        foreach($this->components as $component){
-
-            $html.=$component->render();
+            $html .= $component->render();
 
         }
 
-        $html.='</div>';
-
-
+        $html .= '</div>';
 
         return $html;
     }
-
-
-
-
 
 }

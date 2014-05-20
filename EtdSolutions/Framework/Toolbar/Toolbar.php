@@ -14,18 +14,26 @@ use EtdSolutions\Framework\Toolbar\Button\Button;
 use EtdSolutions\Framework\Toolbar\Button\ButtonDropdownSplit;
 use EtdSolutions\Framework\Toolbar\Button\ButtonGroup;
 use EtdSolutions\Framework\Toolbar\Button\ButtonDropdownSingle;
-
+use Joomla\Form\Form;
 
 defined('_JEXEC') or die;
 
-
 class Toolbar {
 
+    /**
+     * @var Toolbar L'instance générale de la barre d'outils.
+     */
     private static $instance;
+
+    /**
+     * @var array Tableau des boutons d'actions.
+     */
     protected $buttons = array();
 
-
-
+    /**
+     * @var Form Le formulaire utilisé pour filtrer les enregistrements.
+     */
+    protected $filterForm = null;
 
     /**
      * Retourne une référence à l'objet global Toolbar, en le créant seulement si besoin.
@@ -33,8 +41,6 @@ class Toolbar {
      * @return  Toolbar
      */
     public static function getInstance() {
-
-
 
         if (empty(self::$instance)) {
             self::$instance = new Toolbar;
@@ -44,27 +50,28 @@ class Toolbar {
     }
 
     /**
-     * @param $label    Texte du bouton
-     * @param $url      Lien du bouton
-     * @param string $class     Class bootstrap du bouton
-     * @param string $onclick   Action javascript
-     * @param bool $disabled    Cacher un bouton (pas implémenté)
-     * @return Button   objet de type bouton
+     * Méthode pour créer un bouton
+     *
+     * @param string $text    Texte du bouton
+     * @param array  $attribs Tableau des attributs supplémentaires
+     * @param string $icon    Classe CSS Font Awesome (sans le fa-)
+     *
+     * @return Button
      */
+    public static function createButton($text, $attribs = array(), $icon = '') {
 
-    public static function createButton($label, $url, $id, $class = '', $icon='', $onclick = '', $disabled = false){
-
-        $button = new Button($label, $url, $id, $class, $icon, $onclick, $disabled);
-
-        return $button;
+        return new Button($text, $attribs, $icon);
 
     }
 
     /**
-     * @param $components   Tableau des paramètres du bouton (voir paramètres de createButton)
+     * Méthode pour créer un groupe de bouton.
+     *
+     * @param array $components Tableau des boutons à ajouter au groupe.
+     *
      * @return ButtonGroup
      */
-    public static function createButtonGroup($components){
+    public static function createButtonGroup($components) {
 
         $button = new ButtonGroup($components);
 
@@ -72,16 +79,16 @@ class Toolbar {
     }
 
     /**
-     * @param $label    Texte du bouton
-     * @param $url      Lien du bouton
-     * @param array $links      Tableau des paramètres des sous boutons
-     * @param string $class     Class bootstrap du bouton
-     * @param string $onclick   Action javascript
-     * @param bool $disabled    Cacher un bouton (pas implémenté)
-     * @return ButtonDropdownSplit      objet de type bouton
+     * Méthode pour créer un Split Dropdown
+     *
+     * @param array  $links
+     * @param Button $button
+     *
+     * @return ButtonDropdownSplit
      */
-   public static function createButtonDropdownSplit($links, $button=null){
+    public static function createButtonDropdownSplit($links, $button = null) {
 
+        // Si le bouton n'est pas spécifié, on prend le premier du tableau.
         if (is_null($button)) {
             $button = array_shift($links);
         }
@@ -90,31 +97,26 @@ class Toolbar {
     }
 
     /**
-     * @param $label    Texte du bouton
-     * @param $url      Lien du bouton
-     * @param array $links      Tableau des paramètres des sous boutons
-     * @param string $class     Class bootstrap du bouton
-     * @param string $onclick   Action javascript
-     * @param bool $disabled    Cacher un bouton (pas implémenté)
-     * @return ButtonDropdownSingle      objet de type bouton
+     * Méthode pour créer un dropdown
+     *
+     * @param array  $links
+     * @param Button $button
+     *
+     * @return ButtonDropdownSingle
      */
-    public static function createButtonDropdownSingle($links, $button=null){
-
-        if (is_null($button)) {
-            $button = array_shift($links);
-        }
-
+    public static function createButtonDropdownSingle($links, $button = null) {
 
         return new ButtonDropdownSingle($links, $button);
     }
 
-
-
     /**
-     * @param Button $button
+     * Méthode pour ajouter un bouton à la toolbar.
+     *
+     * @param mixed $button
+     *
      * @return $this
      */
-    public function addButton($button){
+    public function addButton($button) {
 
         $this->buttons[] = $button;
 
@@ -123,20 +125,47 @@ class Toolbar {
     }
 
     /**
+     * Méthode pour ajouter un filtre à la toolbar.
+     *
+     * @param Form $form
+     *
+     * @return $this
+     */
+    public function setFilterForm($form) {
+
+        $this->filterForm = $form;
+
+        return $this;
+
+    }
+
+    /**
+     * Retourne le rendu de la barre d'outils.
+     *
      * @return string code HTML du rendu
+     * @throws \RuntimeException
      */
     public function render() {
-        $html = '';
 
-        foreach($this->buttons as $button)
-        {
+        // Get the layout path.
+        $path = JPATH_THEME . "/html/toolbar.php";
 
-            $html .= $button->render();
-
+        // Check if the layout path was found.
+        if (!$path) {
+            throw new \RuntimeException('Toolbar Layout Path Not Found');
         }
 
+        // Start an output buffer.
+        ob_start();
 
-        return $html;
+        // Load the layout.
+        include $path;
+
+        // Get the layout contents.
+        $output = ob_get_clean();
+
+        return $output;
+
     }
 
 }
