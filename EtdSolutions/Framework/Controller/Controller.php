@@ -305,7 +305,8 @@ abstract class Controller extends AbstractController {
 
             // On initialisation les variables.
             $action = 'view';
-            $layout = $this->getInput()->get('layout', 'default');
+            $layout = $this->getInput()
+                           ->get('layout', 'default');
 
             switch ($layout) {
                 case 'form':
@@ -341,20 +342,21 @@ abstract class Controller extends AbstractController {
      * Méthode pour charger un model.
      *
      * @param string $model Le nom du modèle. Facultatif.
+     * @param bool   $ignore_request
      *
      * @return Model Le modèle.
      *
      * @throws \RuntimeException
      */
-    protected function getModel($model = null) {
+    protected function getModel($model = null, $ignore_request = false) {
 
         if (!isset($model) && isset($this->defaultModel)) {
-            $name = ucfirst($this->defaultModel);
-        } else {
+            $model = ucfirst($this->defaultModel);
+        } elseif (!isset($model)) {
             throw new \RuntimeException("Unable to find a model", 500);
         }
 
-        return Model::getInstance($name);
+        return Model::getInstance($model, $ignore_request);
 
     }
 
