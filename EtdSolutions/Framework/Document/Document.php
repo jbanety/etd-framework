@@ -46,6 +46,8 @@ class Document {
 
     public $js = array();
 
+    public $domReadyJs = array();
+
     /**
      * @var string String qui contient le template
      */
@@ -146,6 +148,15 @@ class Document {
 
         if (!in_array($script, $this->js[$position])) {
             $this->js[$position][]  = $script;
+        }
+
+        return $this;
+    }
+
+    public function addDomReadyJS($script) {
+
+        if (!in_array($script, $this->domReadyJs)) {
+            $this->domReadyJs[]  = $script;
         }
 
         return $this;
@@ -290,6 +301,13 @@ class Document {
             // Step through the positions in reverse order.
             for ($i = count($matches[0]) - 1; $i >= 0; $i--) {
                 $positions[$matches[1][$i]] = $matches[0][$i];
+            }
+
+            // On prend la position "foot" si elle existe et on la met en dernier.
+            if (array_key_exists('foot', $positions)) {
+                $foot = $positions['foot'];
+                unset($positions['foot']);
+                $positions['foot'] = $foot;
             }
 
             $this->positions = $positions;
