@@ -176,8 +176,8 @@ abstract class ItemModel extends Model {
         // Je tente les charger les données depuis la session.
         $data = $app->getUserStateFromRequest($this->context.'.edit.data', 'etdform', array(), 'array');
 
-        // Si on a pas de données, on charge celle de l'abonné si on a est en édition.
-        if (empty($data) && $this->get('subscriber.id')) {
+        // Si on a pas de données, on charge celle de l'élément si on a est en édition.
+        if (empty($data) && $this->get($this->context . '.id')) {
             $data = $this->getItem();
         }
 
