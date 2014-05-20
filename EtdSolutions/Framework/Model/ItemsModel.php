@@ -13,6 +13,10 @@ namespace EtdSolutions\Framework\Model;
 use EtdSolutions\Framework\Application\Web;
 use EtdSolutions\Framework\Pagination\Pagination;
 use Joomla\Database\DatabaseQuery;
+use Joomla\Filesystem\Path;
+use Joomla\Form\Form;
+use Joomla\Form\FormHelper;
+use Joomla\Language\Text;
 
 defined('_JEXEC') or die;
 
@@ -176,6 +180,60 @@ abstract class ItemsModel extends Model {
         $this->cache[$store] = $pagination;
 
         return $this->cache[$store];
+    }
+
+    public function getFilterForm($name = null) {
+
+        if (!isset($name)) {
+            $name = $this->getName();
+        }
+
+        $name = "filters_" . strtolower($name);
+
+        // On compile un identifiant de cache.
+        $store = md5("getFilterForm:" . $name);
+
+        if (isset($this->cache[$store])) {
+            return $this->cache[$store];
+        }
+
+        // On instancie le formulaire.
+        $form = new Form($name);
+
+        // On ajoute le chemin vers les fichiers XML.
+        FormHelper::addFormPath(JPATH_FORMS);
+
+        // On ajoute le chemin vers les types de champs.
+        $app = Web::getInstance();
+        $path = Path::clean(JPATH_LIBRARIES . $app->get('app_namespace') . "/Form/Field");
+        FormHelper::addFieldPath($path);
+
+        // On charge les champs depuis le XML.
+        if (!$form->loadFile($name)) {
+            throw new \RuntimeException(Text::sprintf('APP_ERROR_FORM_NOT_LOADED', $name), 500);
+        }
+
+        // On tente de charger les données depuis la session.
+        $data = $app->getUserState($this->context.'.filters', new \stdClass);
+
+        // Si on a pas de données, on prérempli quelques options.
+        if (!property_exists($data, 'list')) {
+            $data->list = array(
+                'direction' => $this->get('list.direction'),
+                'limit'     => $this->get('list.limit'),
+                'ordering'  => $this->get('list.ordering'),
+                'start'     => $this->get('list.start')
+            );
+        }
+
+        // On les lie au formulaire.
+        $form->bind($data);
+
+        // On ajoute l'élement au cache.
+        $this->cache[$store] = $form;
+
+        return $this->cache[$store];
+
     }
 
     /**
