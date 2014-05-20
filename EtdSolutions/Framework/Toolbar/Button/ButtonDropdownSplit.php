@@ -33,13 +33,13 @@ class ButtonDropdownSplit {
 
         $html = '<div class="btn-group">';
         $html .= $this->button->render();
-        $html .= '<button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown">
+        $html .= '<button type="button" class="' . $this->button->getAttribute('class') . ' dropdown-toggle" data-toggle="dropdown">
     <span class="caret"></span>
     <span class="sr-only">Toggle Dropdown</span>
 </button><ul class="dropdown-menu" role="menu">';
 
         foreach($this->links as $link){
-            $link->setClass('');
+            $link->setAttribute('class', '');
             $html.= '<li>'.$link->render().'</li>';
         }
         $html.='</ul></div>';
