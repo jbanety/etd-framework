@@ -591,16 +591,7 @@ final class Web extends AbstractWebApplication {
      * On modifie aussi ici les headers de la réponse pour l'adapter au résultat.
      *
      */
-    protected function render($result = null) {
-
-        // On récupère le document.
-        $doc = $this->getDocument();
-
-        // On parse le document
-        $doc->parse();
-
-        // Description
-        $doc->setDescription($this->get('description'));
+    protected function render($result) {
 
         // C'est un string => HTML
         if (is_string($result)) {
@@ -608,11 +599,29 @@ final class Web extends AbstractWebApplication {
             // On modifie le type MIME de la réponse.
             $this->mimeType = 'text/html';
 
-        } else {
+            // On récupère le document.
+            $doc = $this->getDocument();
 
-            // Si c'est un tableau et que l'on a un code de statut HTTP.
-            if (is_array($result) && array_key_exists('status', $result)) {
-                switch ($result['status']) {
+            // On parse le document
+            $doc->parse();
+
+            // Description
+            $doc->setDescription($this->get('description'));
+
+            // Contenu du controller
+            $doc->setPositionContent('main', $result);
+
+            // On effectue le rendu du document.
+            $data = $doc->render();
+
+        } elseif (is_object($result)) { // C'est un objet => JSON
+
+            // On modifie le type MIME de la réponse.
+            $this->mimeType = 'application/json';
+
+            // Si l'on a un code de statut HTTP.
+            if ( property_exists($result, 'status') ) {
+                switch ($result->status) {
                     case 401:
                         $status = '401 Unauthorized';
                         break;
@@ -630,18 +639,15 @@ final class Web extends AbstractWebApplication {
                         break;
                 }
                 $this->setHeader('status', $status);
-                unset($result['status']);
+                unset($result->status);
             }
 
-            $result = $result['html'];
+            $data = json_encode($result);
 
+        } else {
+            $this->raiseError(Text::_('APP_ERROR_INVALID_RESULT'));
+            return false;
         }
-
-        // Contenu du controller
-        $doc->setPositionContent('main', $result);
-
-        // On effectue le rendu du document.
-        $data = $doc->render();
 
         // On affecte le résultat au corps de la réponse.
         $this->setBody($data);
