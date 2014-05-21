@@ -622,6 +622,9 @@ final class Web extends AbstractWebApplication {
             // Si l'on a un code de statut HTTP.
             if ( property_exists($result, 'status') ) {
                 switch ($result->status) {
+                    case 400:
+                        $status = '400 Bad Request';
+                        break;
                     case 401:
                         $status = '401 Unauthorized';
                         break;
