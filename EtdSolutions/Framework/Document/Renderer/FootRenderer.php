@@ -11,6 +11,7 @@
 namespace EtdSolutions\Framework\Document\Renderer;
 
 use EtdSolutions\Framework\Document\Document;
+use Joomla\Language\Text;
 
 defined('_JEXEC') or die;
 
@@ -57,8 +58,13 @@ class FootRenderer extends DocumentRenderer {
         }
 
         // Generate script declarations
-        if (count($document->js['foot']) || count($document->domReadyJs)) {
+        if (count($document->js['foot']) || count($document->domReadyJs) || count(Text::script())) {
             $buffer .= '<script>' . "\n";
+            if (count(Text::script())) {
+                $buffer .= "if (typeof jbanety !== undefined) {\n";
+                $buffer .= "  jbanety.Text.load(" . json_encode(Text::script()) . ");\n";
+                $buffer .= "}\n";
+            }
             if (count($document->js['foot'])) {
                 foreach ($document->js['foot'] as $content) {
                     $buffer .= $content . "\n";
