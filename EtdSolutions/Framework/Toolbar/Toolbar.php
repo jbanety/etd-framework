@@ -36,6 +36,11 @@ class Toolbar {
     protected $filterForm = null;
 
     /**
+     * @var string Le titre de la page.
+     */
+    protected $title = null;
+
+    /**
      * Retourne une référence à l'objet global Toolbar, en le créant seulement si besoin.
      *
      * @return  Toolbar
@@ -137,6 +142,27 @@ class Toolbar {
 
         return $this;
 
+    }
+
+    /**
+     * Méthode pour définir le titre de page affiché dans la barre d'outils.
+     *
+     * @param string $title
+     *
+     * @return Toolbar
+     */
+    public function setTitle($title) {
+        $this->title = $title;
+        return $this;
+    }
+
+    /**
+     * Renvoi le titre de page.
+     *
+     * @return string
+     */
+    public function getTitle() {
+        return $this->title;
     }
 
     /**
