@@ -111,7 +111,7 @@ abstract class ItemModel extends Model {
 
         // On ajoute le chemin vers les types de champs.
         $app = Web::getInstance();
-        $path = Path::clean(JPATH_LIBRARIES . $app->get('app_namespace') . "/Form");
+        $path = Path::clean(JPATH_LIBRARIES . $app->get('app_namespace') . "/Form/Field");
         FormHelper::addFieldPath($path);
 
         // On charge les champs depuis le XML.
