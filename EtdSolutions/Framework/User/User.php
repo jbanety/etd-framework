@@ -62,7 +62,7 @@ class User extends DataObject {
         $instance = $app->getSession()
                         ->get('user');
 
-        if (is_null($id) || $instance->id == $id) {
+        if (is_null($id) || (!is_null($instance) && $instance->id == $id)){
 
             if (!($instance instanceof User)) {
                 return new User;
