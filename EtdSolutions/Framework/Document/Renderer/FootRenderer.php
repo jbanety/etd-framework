@@ -61,8 +61,8 @@ class FootRenderer extends DocumentRenderer {
         if (count($document->js['foot']) || count($document->domReadyJs) || count(Text::script())) {
             $buffer .= '<script>' . "\n";
             if (count(Text::script())) {
-                $buffer .= "if (typeof jbanety !== undefined) {\n";
-                $buffer .= "  jbanety.Text.load(" . json_encode(Text::script()) . ");\n";
+                $buffer .= "if (typeof EtdSolutions !== undefined) {\n";
+                $buffer .= "  EtdSolutions.Framework.Language.Text.load(" . json_encode(Text::script()) . ");\n";
                 $buffer .= "}\n";
             }
             if (count($document->js['foot'])) {
