@@ -181,7 +181,7 @@ final class Web extends AbstractWebApplication {
      *
      * @return  boolean  True si trouvé et valide, false sinon.
      */
-    public function checkToken($method = 'post') {
+    public function checkToken($method = 'request') {
 
         $token = $this->getFormToken();
 
@@ -190,8 +190,7 @@ final class Web extends AbstractWebApplication {
                      ->isNew()
             ) {
                 // On redirige vers la page de login.
-                echo '{"message":"Votre session est expirée."}';
-                $this->close(401);
+                $this->redirect('login', Text::_('APP_ERROR_EXPIRED_SESSION'), 'warning');
             } else {
                 return false;
             }
