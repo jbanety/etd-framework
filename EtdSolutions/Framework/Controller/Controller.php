@@ -287,58 +287,6 @@ abstract class Controller extends AbstractController {
     }
 
     /**
-     * Méthode pour contrôler les droits d'accès de l'utilisateur pour une action.
-     *
-     * @param string $action  L'action à tester.
-     * @param string $section La section sur laquelle l'action est faite.
-     *
-     * @return bool True si ok, false sinon.
-     *
-     * @note Cette méthode est un proxy pour User::authorise();
-     */
-    public function canDo($action = null, $section = null) {
-
-        $user = User::getInstance();
-
-        // Si on a pas d'action, on devine.
-        if (empty($action)) {
-
-            // On initialisation les variables.
-            $action = 'view';
-            $layout = $this->getInput()
-                           ->get('layout', 'default');
-
-            switch ($layout) {
-                case 'form':
-
-                    if ($this->doTask == "add") {
-                        $action = "create";
-                    } elseif ($this->doTask == "edit") {
-                        $action = "edit";
-                    }
-
-                    break;
-                case 'delete':
-                    // Action de suppression.
-                    $action = 'delete';
-                    break;
-
-                default:
-                    // rien de spécial
-                    break;
-            }
-        }
-
-        // Si on a pas de section, on prend le nom du controller.
-        if (empty($section)) {
-            $section = strtolower($this->getName());
-        }
-
-        return $user->authorise($action, $section);
-
-    }
-
-    /**
      * Méthode pour charger un model.
      *
      * @param string $model Le nom du modèle. Facultatif.
