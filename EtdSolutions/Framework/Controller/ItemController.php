@@ -67,7 +67,7 @@ class ItemController extends Controller {
             // On trouve le bon match en utlisant les expressions régulières.
             foreach ($plural as $k => $v) {
                 if (preg_match($k, $this->itemRoute)) {
-                    $this->itemRoute = preg_replace($k, $v, $this->itemRoute);
+                    $this->listRoute = preg_replace($k, $v, $this->itemRoute);
                     break;
                 }
             }
@@ -85,7 +85,7 @@ class ItemController extends Controller {
 
         // On contrôle les droits.
         if (!$this->allowAdd()) {
-            $this->redirect($this->listRoute, Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 'error');
+            $this->redirect("/".$this->listRoute, Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 'error');
         }
 
         // On passe en layout de création (form).
@@ -110,7 +110,7 @@ class ItemController extends Controller {
 
         // On contrôle les droits.
         if (!$this->allowEdit($id)) {
-            $this->redirect($this->listRoute, Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 'error');
+            $this->redirect("/".$this->listRoute, Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 'error');
         }
 
         // On passe en layout de création (form).
@@ -143,12 +143,12 @@ class ItemController extends Controller {
 
         // On contrôle les droits.
         if (!$this->allowDelete($id)) {
-            $this->redirect($this->listRoute, Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 'error');
+            $this->redirect("/".$this->listRoute, Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 'error');
         }
 
         // Si on a aucun élément, on redirige vers la liste avec une erreur.
         if (!is_array($id) || count($id) < 1) {
-            $this->redirect($this->listRoute, Text::_('CTRL_' . strtoupper($this->getName()) . '_NO_ITEM_SELECTED'), 'warning');
+            $this->redirect("/".$this->listRoute, Text::_('CTRL_' . strtoupper($this->getName()) . '_NO_ITEM_SELECTED'), 'warning');
         }
 
         // On récupềre le model
@@ -162,7 +162,7 @@ class ItemController extends Controller {
         $model->delete($id);
 
         // La suppresion est faite, on redirige vers la liste.
-        $this->redirect($this->listRoute, Text::_('REMOVAL_PERFORMED'), 'success');
+        $this->redirect("/".$this->listRoute, Text::_('REMOVAL_PERFORMED'), 'success');
 
     }
 
@@ -192,7 +192,7 @@ class ItemController extends Controller {
 
         // Contrôle d'accès.
         if (!$this->allowSave($recordId)) {
-            $this->redirect($this->listRoute, Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 'error');
+            $this->redirect("/".$this->listRoute, Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 'error');
 
             return false;
         }
@@ -206,7 +206,7 @@ class ItemController extends Controller {
                 $errors .= "<li>" . $exception->getMessage() . "</li>";
             }
             $errors .= "</ul>";
-            $this->redirect($this->itemRoute . $this->getRedirectToItemAppend($recordId), Text::sprintf('PROBLEM_MODIFICATION', $errors), 'danger');
+            $this->redirect("/".$this->itemRoute . $this->getRedirectToItemAppend($recordId), Text::sprintf('PROBLEM_MODIFICATION', $errors), 'danger');
         }
 
         // On enregistre.
@@ -217,7 +217,7 @@ class ItemController extends Controller {
            ->setUserState($this->getName() . '.edit.data', null);
 
         // On redirige vers la page de listing.
-        $this->redirect($this->listRoute, Text::_('CTRL_' . strtoupper($this->getName()) . '_SAVE_SUCCESS'), 'success');
+        $this->redirect("/".$this->listRoute, Text::_('CTRL_' . strtoupper($this->getName()) . '_SAVE_SUCCESS'), 'success');
 
     }
 
@@ -231,7 +231,7 @@ class ItemController extends Controller {
            ->setUserState($this->getName() . '.edit.data', null);
 
         // On redirige vers la liste.
-        $this->redirect($this->listRoute);
+        $this->redirect("/".$this->listRoute);
 
     }
 
@@ -244,7 +244,7 @@ class ItemController extends Controller {
 
         // On contrôle les droits.
         if (!$this->allowView()) {
-            $this->redirect($this->listRoute, Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 'error');
+            $this->redirect("/".$this->listRoute, Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 'error');
         }
 
         // On nettoie les informations d'édition de l'enregistrement dans la session.
