@@ -11,6 +11,7 @@
 namespace EtdSolutions\Framework\Model;
 
 use EtdSolutions\Framework\Application\Web;
+use EtdSolutions\Framework\Table\Table;
 use Joomla\Model\AbstractDatabaseModel;
 use Joomla\Registry\Registry;
 
@@ -105,6 +106,26 @@ abstract class Model extends AbstractDatabaseModel {
     }
 
     /**
+     * Méthode pour récupérer un objet Table, en le chargeant si nécessaire.
+     *
+     * @param   string $name    Le nom du Table. Optionnel.
+     *
+     * @return  Table  Un objet Table
+     *
+     * @throws  \RuntimeException
+     *
+     * @note    Proxy vers Table::getInstance().
+     */
+    public function getTable($name = null) {
+
+        if (!isset($name)) {
+            $name = $this->getName();
+        }
+
+        return Table::getInstance($name);
+    }
+
+    /**
      * Récupère une valeur dans l'état du modèle.
      *
      * @param   string $path    Chemin dans le registre
@@ -176,6 +197,10 @@ abstract class Model extends AbstractDatabaseModel {
 
     public function getErrors() {
         return $this->errors;
+    }
+
+    public function getError() {
+        return $this->errors[0];
     }
 
     public function setErrors($errors) {

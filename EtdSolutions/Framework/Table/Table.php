@@ -12,6 +12,7 @@ namespace EtdSolutions\Framework\Table;
 
 use EtdSolutions\Framework\Application\Web;
 use Joomla\Data\DataObject;
+use Joomla\Language\Text;
 
 defined('_JEXEC') or die;
 
@@ -36,6 +37,11 @@ abstract class Table extends DataObject {
     protected $pk = '';
 
     /**
+     * @var array Les erreurs survenues dans le table.
+     */
+    protected $errors = array();
+
+    /**
      * @var  Table  Les instances des tables.
      */
     private static $instances;
@@ -45,8 +51,14 @@ abstract class Table extends DataObject {
      *
      * @param   string $table Nom de la table à modéliser.
      * @param   mixed  $pk    Nom de la clé primaire.
+     *
+     * @throws \InvalidArgumentException
      */
     public function __construct($table, $pk = 'id') {
+
+        if(empty($table)) {
+            throw new \InvalidArgumentException("Table name is empty");
+        }
 
         // Nom de la table.
         $this->table = $table;
@@ -59,7 +71,7 @@ abstract class Table extends DataObject {
     /**
      * Méthode pour récupérer une instance d'un table, la créant si besoin.
      *
-     * @param   string $name Le nom du table
+     * @param   string $name      Le nom de la classe
      *
      * @return  Table  L'instance.
      *
@@ -97,7 +109,7 @@ abstract class Table extends DataObject {
                 throw new \RuntimeException("Unable find table " . $name, 500);
             }
 
-            self::$instances[$store] = new $className(null);
+            self::$instances[$store] = new $className();
         }
 
         return self::$instances[$store];
@@ -173,6 +185,8 @@ abstract class Table extends DataObject {
 
         // On contrôle que l'on a bien un résultat.
         if (empty($row)) {
+            $this->addError(Text::_('APP_ERROR_TABLE_EMPTY_ROW'));
+
             return false;
         }
 
@@ -243,6 +257,9 @@ abstract class Table extends DataObject {
             return false;
         }
 
+        // On nettoie les erreurs.
+        $this->clearErrors();
+
         return true;
     }
 
@@ -286,6 +303,56 @@ abstract class Table extends DataObject {
         $pk = $this->getProperty($this->pk);
 
         return !empty($pk);
+    }
+
+    /**
+     * Méthode pour stocker une erreur.
+     *
+     * @param $error
+     *
+     * @return $this
+     */
+    public function addError($error) {
+
+        array_push($this->errors, $error);
+
+        return $this;
+    }
+
+    /**
+     * Donne les erreurs survenues dans le table.
+     *
+     * @return array
+     */
+    public function getErrors() {
+
+        return $this->errors;
+    }
+
+    /**
+     * @return string La première erreur.
+     */
+    public function getError() {
+
+        return $this->errors[0];
+    }
+
+    /**
+     * Supprime toutes les erreurs.
+     */
+    public function clearErrors() {
+
+        $this->errors = array();
+    }
+
+    /**
+     * Méthode pour savoir si le table a des erreurs.
+     *
+     * @return bool True s'il y a des erreurs.
+     */
+    public function hasError() {
+
+        return (count($this->errors) > 0);
     }
 
 }
