@@ -12,6 +12,7 @@ namespace EtdSolutions\Framework\User;
 
 use EtdSolutions\Framework\Application\Web;
 use EtdSolutions\Framework\Model\Model;
+use EtdSolutions\Framework\Table\Table;
 use Joomla\Data\DataObject;
 use Joomla\Language\Text;
 use Joomla\Registry\Registry;
@@ -128,11 +129,11 @@ class User extends DataObject {
      */
     public function setLastVisit($timestamp = null) {
 
-        // Create the user table object
-        $model = $this->getModel();
+        // On récupère le table.
+        $table = Table::getInstance('user');
 
         // On met à jour la date.
-        return $model->setLastVisit($timestamp, $this->getProperty('id'));
+        return $table->setLastVisit($timestamp, $this->getProperty('id'));
     }
 
     /**
@@ -146,36 +147,29 @@ class User extends DataObject {
      */
     public function load($id) {
 
-        // On crée le modèle.
-        $model = $this->getModel();
+        // On récupère le table.
+        $table = Table::getInstance('user');
 
-        // On charge l'utilisateur.
-        $user = $model->getItem($id);
-
-        // Si le modèle n'a pas chargé l'utilisateur.
-        if (!isset($user)) {
+        // On tente de charger l'utilisateur.
+        if (!$table->load($id)) {
 
             // On déclenche une exception.
             throw new \RuntimeException(Text::sprintf('USER_ERROR_UNABLE_TO_LOAD_USER', $id));
 
         } else {
 
+            // On récupère ses propriétés.
+            $user = $table->dump(0);
+
             // Ce n'est plus un invité.
             $user->guest = 0;
+
+            // On transforme les droits en objet registre.
+            $user->rights = new Registry($user->rights);
 
         }
 
         return $user;
-    }
-
-    /**
-     * Méthode pour charger le modèle UserModel.
-     *
-     * @see Model::getInstance
-     */
-    protected function getModel() {
-
-        return Model::getInstance('User');
     }
 
 }
