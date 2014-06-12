@@ -201,10 +201,13 @@ class ItemController extends Controller {
             return false;
         }
 
-        // On valide les données.
-        $validData = $model->validate($data);
+        // On filtre les données
+        $data = $model->filter($data);
 
-        if ($validData === false) {
+        // On valide les données.
+        $valid = $model->validate($data);
+
+        if ($valid === false) {
 
             // On récupère les messages de validation.
             $errors = $model->getErrors();
@@ -228,10 +231,10 @@ class ItemController extends Controller {
         }
 
         // On enregistre.
-        if (!$model->save($validData)) {
+        if (!$model->save($data)) {
 
             // On sauvegarde les données VALIDÉES dans la session.
-            $app->setUserState($this->getName() . '.edit.data', $validData);
+            $app->setUserState($this->getName() . '.edit.data', $data);
 
             // On renvoi vers le formulaire.
             $this->redirect("/" . $this->itemRoute . $this->getRedirectToItemAppend($recordId), Text::sprintf('JLIB_APPLICATION_ERROR_SAVE_FAILED', $model->getError()), 'error');
