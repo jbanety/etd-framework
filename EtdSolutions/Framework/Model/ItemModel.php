@@ -13,13 +13,11 @@ namespace EtdSolutions\Framework\Model;
 use EtdSolutions\Framework\Application\Web;
 use EtdSolutions\Framework\Table\Table;
 use EtdSolutions\Framework\User\User;
-use Joomla\Database\DatabaseQuery;
 use Joomla\Filesystem\Path;
-use Joomla\Form\Form;
+use EtdSolutions\Framework\Form\Form;
 use Joomla\Form\FormHelper;
 use Joomla\Language\Text;
 use Joomla\Registry\Registry;
-use Joomla\Utilities\ArrayHelper;
 
 defined('_JEXEC') or die;
 
@@ -161,7 +159,6 @@ abstract class ItemModel extends Model {
     public function validate($data) {
 
         $form = $this->getForm();
-        $data = $this->filter($data);
         $ret  = $form->validate($data);
 
         // Si le form n'est pas valide, on stocke les erreurs dans le modèle.
@@ -170,6 +167,28 @@ abstract class ItemModel extends Model {
         }
 
         return $ret;
+    }
+
+    /**
+     * Méthode pour ne valider qu'un seul champ suivant les règles du formulaire associé au modèle.
+     *
+     * @param $name  string Le nom du champ.
+     * @param $data mixed Les données à tester.
+     *
+     * @return boolean True si valide, false sinon.
+     */
+    public function validateField($name, $data) {
+
+        $form  = $this->getForm();
+        $ret   = $form->validate($data, null, $name);
+
+        // Si le champ n'est pas valide, on stocke les erreurs dans le modèle.
+        if ($ret === false) {
+            $this->setErrors($form->getErrors());
+        }
+
+        return $ret;
+
     }
 
     /**
@@ -287,9 +306,9 @@ abstract class ItemModel extends Model {
         // On met à jour la session.
         $pkName = $table->getPk();
         if (isset($table->$pkName)) {
-            $this->setState($this->context . '.id', $table->$pkName);
+            $this->set($this->context . '.id', $table->$pkName);
         }
-        $this->setState($this->context . '.isNew', $isNew);
+        $this->set($this->context . '.isNew', $isNew);
 
         return true;
 
