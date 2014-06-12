@@ -222,11 +222,14 @@ abstract class Table extends DataObject {
         $db = Web::getInstance()
                  ->getDb();
 
+        // On récupère les propriétés.
+        $properties = $this->dump(0);
+
         // Si une clé primaire existe on met à jour l'objet, sinon on l'insert.
         if ($this->hasPrimaryKey()) {
-            $result = $db->updateObject($this->table, $this, $this->pk, $updateNulls);
+            $result = $db->updateObject($this->table, $properties, $this->pk, $updateNulls);
         } else {
-            $result = $db->insertObject($this->table, $this, $this->pk);
+            $result = $db->insertObject($this->table, $properties, $this->pk);
         }
 
         return $result;
