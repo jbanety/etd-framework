@@ -18,6 +18,7 @@ use EtdSolutions\Framework\Form\Form;
 use Joomla\Form\FormHelper;
 use Joomla\Language\Text;
 use Joomla\Registry\Registry;
+use Joomla\String\String;
 
 defined('_JEXEC') or die;
 
@@ -315,6 +316,73 @@ abstract class ItemModel extends Model {
     }
 
     /**
+     * Méthode pour dupliquer un enregistrement.
+     *
+     * @param $pks array Un tableau des clés primaires représentantes des enregistrements à dupliquer.
+     *
+     * @return bool
+     */
+    public function duplicate($pks) {
+
+        // On s'assure d'avoir un tableau.
+        $pks = (array)$pks;
+
+        // On récupère le table.
+        $table = $this->getTable();
+
+        // On supprime tous les éléments.
+        foreach ($pks as $i => $pk) {
+
+            // On teste si l'utilisateur peut modifier cet enregistrement et en ajouter un autre.
+            if ($this->allowEdit($pk) && $this->allowAdd()) {
+
+                // On tente de charger la ligne.
+                if ($table->load($pk) === false) {
+                    $this->setError($table->getError());
+
+                    return false;
+                }
+
+                // On retire la clé primaire pour créer une nouvelle ligne.
+                $table->{$table->getPk()} = null;
+
+                // On change les champs.
+                $this->prepareDuplicatedTable($table);
+
+                // On contrôle les données.
+                if (!$table->check()) {
+                    $this->setError($table->getError());
+
+                    return false;
+                }
+
+                // On stocke les données.
+                if (!$table->store()) {
+                    $this->setError($table->getError());
+
+                    return false;
+                }
+
+            } else {
+
+                // On retire la clé primaire fautive.
+                unset($pks[$i]);
+
+                // On retourne une erreur.
+                $this->setError(Text::_('CTRL_LIST_ERROR_DUPLICATE_NOT_PERMITTED'));
+
+                return false;
+            }
+        }
+
+        // On nettoie le cache.
+        $this->cleanCache();
+
+        return true;
+
+    }
+
+    /**
      * Méthode pour nettoyer le cache.
      *
      * @param null $id Un identifiant de cache optionnel.
@@ -334,6 +402,32 @@ abstract class ItemModel extends Model {
 
         return User::getInstance()
                    ->authorise('delete', $this->getName());
+    }
+
+    /**
+     * Méthode pour contrôler si l'utilisateur peut ajouter un enregistrement.
+     *
+     * @param   array|int $id L'identifiant de l'enregistrement.
+     *
+     * @return  boolean
+     */
+    protected function allowAdd() {
+
+        return User::getInstance()
+                   ->authorise('create', $this->getName());
+    }
+
+    /**
+     * Méthode pour contrôler si l'utilisateur peut éditer un enregistrement.
+     *
+     * @param   array|int $id L'identifiant de l'enregistrement.
+     *
+     * @return  boolean
+     */
+    protected function allowEdit($id = null) {
+
+        return User::getInstance()
+                   ->authorise('edit', $this->getName());
     }
 
     /**
@@ -360,6 +454,18 @@ abstract class ItemModel extends Model {
         // Les classes dérivées pourront l'implémenter si besoin.
 
         return $table;
+    }
+
+    /**
+     * Prépare le Table avant sa duplication.
+     * On l'utilise pour changer certain champs avant son insertion en BDD.
+     *
+     * @param Table $table Une référence à un objet Table.
+     */
+    protected function prepareDuplicatedTable(Table &$table) {
+
+        // Les classes dérivées pourront l'implémenter si besoin.
+
     }
 
     protected function loadFormData($options = array()) {

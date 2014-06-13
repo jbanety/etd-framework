@@ -104,9 +104,30 @@ class ItemController extends Controller {
      */
     public function edit() {
 
+        // App
+        $app = Web::getInstance();
+
+        // On contrôle le jeton de la requête.
+        if (!$app->checkToken()) {
+            $app->raiseError(Text::_('APP_ERROR_INVALID_TOKEN', 403));
+        }
+
         // On récupère l'identifiant.
         $id = $this->getInput()
-                   ->get('id', null, 'uint');
+                   ->get('id', null, 'array');
+
+        // Si on a aucun élément, on redirige vers la liste avec une erreur.
+        if (!is_array($id) || count($id) < 1) {
+            $this->redirect("/" . $this->listRoute, Text::_('CTRL_' . strtoupper($this->getName()) . '_NO_ITEM_SELECTED'), 'warning');
+
+            return false;
+        }
+
+        // On ne prend que le premier des ids.
+        $id = (int) $id[0];
+
+        // On modifie l'input pour mettre l'id.
+        $this->getInput()->set('id', $id);
 
         // On contrôle les droits.
         if (!$this->allowEdit($id)) {
@@ -189,10 +210,7 @@ class ItemController extends Controller {
         $model    = $this->getModel();
         $input    = $this->getInput();
         $data     = $input->get('etdform', array(), 'array');
-        $recordId = $input->get('id', 0, 'uint');
-
-        // On définit l'identifiant de la ligne depuis la requête.
-        $data['id'] = $recordId;
+        $recordId = (int) $data['id'];
 
         // Contrôle d'accès.
         if (!$this->allowSave($recordId)) {
@@ -283,6 +301,51 @@ class ItemController extends Controller {
 
         //On affiche la vue
         return $this->display();
+
+    }
+
+    /**
+     * Méthode pour dupliquer un enregistrement.
+     *
+     * @return bool
+     */
+    public function duplicate() {
+
+        // App
+        $app = $this->getApplication();
+
+        // On contrôle le jeton de la requête.
+        if (!$app->checkToken()) {
+            $app->raiseError(Text::_('APP_ERROR_INVALID_TOKEN', 403));
+        }
+
+        $model = $this->getModel();
+        $id    = $this->getInput()
+                      ->get('id', 0, 'array');
+
+        // Si on a aucun élément, on redirige vers la liste avec une erreur.
+        if (!is_array($id) || count($id) < 1) {
+            $this->redirect("/" . $this->listRoute, Text::_('CTRL_' . strtoupper($this->getName()) . '_NO_ITEM_SELECTED'), 'warning');
+
+            return false;
+        }
+
+        // On s'assure que ce sont bien des integers.
+        $id = ArrayHelper::toInteger($id);
+
+        // On duplique.
+        if ($model->duplicate($id)) {
+
+            // La suppresion s'est faite avec succès.
+            $this->redirect("/" . $this->listRoute, Text::plural('CTRL_' . strtoupper($this->getName()) . '_N_ITEMS_DUPLICATED', count($id)), 'success');
+
+        } else {
+
+            // Une erreur s'est produite.
+            $this->redirect("/" . $this->listRoute, $model->getError(), 'error');
+        }
+
+        return true;
 
     }
 
