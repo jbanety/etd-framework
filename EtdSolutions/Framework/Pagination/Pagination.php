@@ -27,10 +27,12 @@ class Pagination extends DataObject {
     public function __construct($total, $start, $limit) {
 
         // Initialisation.
-        $viewall = false;
-        $total   = (int)$total;
-        $start   = (int)max($start, 0);
-        $limit   = (int)max($limit, 0);
+        $viewall      = false;
+        $total        = (int)$total;
+        $start        = (int)max($start, 0);
+        $limit        = (int)max($limit, 0);
+        $pagesCurrent = 0;
+        $pagesTotal   = 0;
 
         if ($limit > $total) {
             $start = 0;
