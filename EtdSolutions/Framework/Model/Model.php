@@ -200,7 +200,7 @@ abstract class Model extends AbstractDatabaseModel {
     }
 
     public function getError() {
-        return $this->errors[0];
+        return count($this->errors) ? $this->errors[0] : false;
     }
 
     public function setErrors($errors) {
