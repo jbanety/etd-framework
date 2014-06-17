@@ -10,9 +10,11 @@
 
 namespace EtdSolutions\Framework\Table;
 
+use DumpableInterface;
 use EtdSolutions\Framework\Application\Web;
 use Joomla\Data\DataObject;
 use Joomla\Language\Text;
+use Joomla\Registry\Registry;
 
 defined('_JEXEC') or die;
 
@@ -56,7 +58,7 @@ abstract class Table extends DataObject {
      */
     public function __construct($table, $pk = 'id') {
 
-        if(empty($table)) {
+        if (empty($table)) {
             throw new \InvalidArgumentException("Table name is empty");
         }
 
@@ -66,12 +68,24 @@ abstract class Table extends DataObject {
         // Nom de la clé primaire.
         $this->pk = $pk;
 
+        // On initialise les propriétés du Table.
+        $fields = $this->getFields();
+
+        if ($fields) {
+            foreach ($fields as $name) {
+                // On ajoute le champ s'il n'est pas déjà présent.
+                if (!isset($this->$name)) {
+                    $this->setProperty($name, null);
+                }
+            }
+        }
+
     }
 
     /**
      * Méthode pour récupérer une instance d'un table, la créant si besoin.
      *
-     * @param   string $name      Le nom de la classe
+     * @param   string $name Le nom de la classe
      *
      * @return  Table  L'instance.
      *
@@ -194,6 +208,20 @@ abstract class Table extends DataObject {
         $this->bind($row);
 
         return true;
+    }
+
+    public function bind($source, $updateNulls = true, $ignore = array()) {
+
+        // On s'assure que la source est un tableau.
+        $source = (array) $source;
+
+        // On ne garde que les données liables avec le tableau.
+        $source = array_intersect_key($source, (array) $this->dump(0));
+
+        // On supprime les champs ignorés.
+        $source = array_diff_key($source, array_fill_keys($ignore, null));
+
+        return parent::bind($source, $updateNulls);
     }
 
     /**
@@ -337,7 +365,7 @@ abstract class Table extends DataObject {
      */
     public function getError() {
 
-        return $this->errors[0];
+        return count($this->errors) ? $this->errors[0] : false;
     }
 
     /**
