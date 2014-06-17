@@ -104,14 +104,6 @@ class ItemController extends Controller {
      */
     public function edit() {
 
-        // App
-        $app = Web::getInstance();
-
-        // On contrôle le jeton de la requête.
-        if (!$app->checkToken()) {
-            $app->raiseError(Text::_('APP_ERROR_INVALID_TOKEN', 403));
-        }
-
         // On récupère l'identifiant.
         $id = $this->getInput()
                    ->get('id', null, 'array');
