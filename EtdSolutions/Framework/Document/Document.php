@@ -135,46 +135,66 @@ class Document {
         return $this->description;
     }
 
-    public function addScript($url, $position = "foot") {
+    public function addScript($url, $position = "foot", $onTop = false) {
 
         if (!in_array($url, $this->scripts[$position])) {
-            $this->scripts[$position][]  = $url;
+            if ($onTop) {
+                array_unshift($this->scripts[$position], $url);
+            } else {
+                array_push($this->scripts[$position], $url);
+            }
         }
 
         return $this;
     }
 
-    public function addJS($script, $position = "foot") {
+    public function addJS($script, $position = "foot", $onTop = false) {
 
         if (!in_array($script, $this->js[$position])) {
-            $this->js[$position][]  = $script;
+            if ($onTop) {
+                array_unshift($this->js[$position], $script);
+            } else {
+                array_push($this->js[$position], $script);
+            }
         }
 
         return $this;
     }
 
-    public function addDomReadyJS($script) {
+    public function addDomReadyJS($script, $onTop = false) {
 
         if (!in_array($script, $this->domReadyJs)) {
-            $this->domReadyJs[]  = $script;
+            if ($onTop) {
+                array_unshift($this->domReadyJs, $script);
+            } else {
+                array_push($this->domReadyJs, $script);
+            }
         }
 
         return $this;
     }
 
-    public function addStylesheet($url, $position = "head") {
+    public function addStylesheet($url, $position = "head", $onTop = false) {
 
         if (!in_array($url, $this->stylesheets[$position])) {
-            $this->stylesheets[$position][]  = $url;
+            if ($onTop) {
+                array_unshift($this->stylesheets[$position], $url);
+            } else {
+                array_push($this->stylesheets[$position], $url);
+            }
         }
 
         return $this;
     }
 
-    public function addCSS($css, $position = "head") {
+    public function addCSS($css, $position = "head", $onTop = false) {
 
         if (!in_array($css, $this->styles[$position])) {
-            $this->styles[$position][]  = $css;
+            if ($onTop) {
+                array_unshift($this->styles, $css);
+            } else {
+                array_push($this->styles, $css);
+            }
         }
 
         return $this;
@@ -238,13 +258,14 @@ class Document {
         // On définit la liste des espaces de noms dans laquelle le renderer peut se trouver.
         $namespaces = array(
             '\\EtdSolutions\\Framework',
-            Web::getInstance()->get('app_namespace')
+            Web::getInstance()
+               ->get('app_namespace')
         );
 
         $className = "";
 
         // On cherche la vue dans ces espaces de nom.
-        foreach($namespaces as $namespace) {
+        foreach ($namespaces as $namespace) {
 
             // On crée le nom de la classe.
             $className = $namespace . '\\Document\\Renderer\\' . ucfirst($position) . 'Renderer';
