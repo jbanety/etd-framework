@@ -129,7 +129,7 @@ abstract class ItemModel extends Model {
 
         // On charge les champs depuis le XML.
         if (!$form->loadFile($name)) {
-            throw new \RuntimeException(Text::_('APP_ERROR_FORM_NOT_LOADED'), 500);
+            throw new \RuntimeException(Text::sprintf('APP_ERROR_FORM_NOT_LOADED', $name), 500);
         }
 
         // On modifie le formulaire si besoin.
