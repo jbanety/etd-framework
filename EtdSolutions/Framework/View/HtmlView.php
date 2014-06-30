@@ -10,9 +10,10 @@
 
 namespace EtdSolutions\Framework\View;
 
+use EtdSolutions\Framework\Application\Web;
+use EtdSolutions\Framework\Document\Document;
 use EtdSolutions\Framework\Model\Model;
 use Joomla\Model\AbstractModel;
-use Joomla\Model\ModelInterface;
 use Joomla\View\AbstractHtmlView;
 
 defined('_JEXEC') or die;
@@ -60,22 +61,39 @@ class HtmlView extends AbstractHtmlView {
     /**
      * Méthode pour charger un model.
      *
-     * @param string $model Le nom du modèle. Facultatif.
+     * @param string $name Le nom du modèle. Facultatif.
      *
      * @return AbstractModel Le modèle.
      *
      * @throws \RuntimeException
      */
-    protected function getModel($model = null) {
+    protected function getModel($name = null) {
 
-        if (!isset($model) && isset($this->defaultModel)) {
-            $name = ucfirst($this->defaultModel);
-        } else {
-            throw new \RuntimeException("Unable to find a model", 500);
+        if (!isset($name)) {
+            if (isset($this->defaultModel)) {
+                $name = $this->defaultModel;
+            } else {
+                throw new \RuntimeException("Unable to find a model", 500);
+            }
         }
+
+        $name = ucfirst($name);
 
         return Model::getInstance($name);
 
+    }
+
+    /**
+     * Méthode pour renvoyer le document HTML associé à l'application.
+     *
+     * @return Document Le document HTML.
+     *
+     * @note Juste un proxy pour Web::getDocument()
+     */
+    protected function getDocument() {
+
+        return Web::getInstance()
+                  ->getDocument();
     }
 
     /**
