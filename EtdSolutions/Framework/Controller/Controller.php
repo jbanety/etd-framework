@@ -27,6 +27,8 @@ abstract class Controller extends AbstractController {
 
     protected $defaultTask = 'display';
 
+    protected $defaultLayout = 'default';
+
     protected $defaultView;
 
     protected $name;
@@ -136,11 +138,6 @@ abstract class Controller extends AbstractController {
             $this->redirect('/login', Text::_('APP_ERROR_MUST_BE_LOGGED'), 'warning');
         }
 
-        // On contrôle les droits d'accès.
-        /*if (!$this->canDo()) {
-            throw new \RuntimeException(Text::_('APP_ERROR_UNAUTHORIZED_ACTION'), 403);
-        }*/
-
         return $this->renderView($view);
 
     }
@@ -185,9 +182,11 @@ abstract class Controller extends AbstractController {
         // On instancie la vue.
         $view = new $className();
 
-        // On affecte le layout, si aucun n'est spécifié on prend le layout "default" par défaut.
-        $layout = $app->input->get('layout', 'default');
-        $view->setLayout($layout);
+        // On définit la valeur par défaut pour le layout si aucun n'est spécifié.
+        $app->input->def('layout', $this->defaultLayout);
+
+        // On affecte le layout à la vue.
+        $view->setLayout($app->input->get('layout'));
 
         try {
             $result = $view->render();
