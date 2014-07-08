@@ -11,6 +11,7 @@
 namespace EtdSolutions\Framework\Document\Renderer;
 
 use EtdSolutions\Framework\Application\Web;
+use Joomla\Language\Text;
 
 defined('_JEXEC') or die;
 
@@ -39,12 +40,15 @@ class MessageRenderer extends DocumentRenderer {
             $buffer .= '<ul class="alerts-list">';
             foreach ($lists as $type => $messages) {
                 $buffer .= '<li>';
-                foreach ($messages as $message) {
-                    $buffer .= '<div class="alert alert-' . $type . ' alert-dismissable">';
-                    $buffer .= '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
-                    $buffer .= '<i class="fa fa-' . $message['icon'] . '"></i> '. $message['message'];
-                    $buffer .= '</div>';
+                $buffer .= '<div class="alert alert-' . $type . ' alert-dismissable" role="alert">';
+                $buffer .= '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">' . Text::_('APP_GLOBAL_CLOSE') . '</span></button>';
+                foreach ($messages as $i => $message) {
+                    if ($i > 0) {
+                        $buffer .= "<br>";
+                    }
+                    $buffer .= $message['message'];
                 }
+                $buffer .= '</div>';
                 $buffer .= '</li>';
             }
             $buffer .= '</ul>';
