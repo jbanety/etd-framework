@@ -12,6 +12,7 @@ namespace EtdSolutions\Framework\Controller;
 
 use EtdSolutions\Framework\Application\Web;
 use EtdSolutions\Framework\Model\ItemModel;
+use EtdSolutions\Framework\Model\Model;
 use EtdSolutions\Framework\User\User;
 use Joomla\Application\AbstractApplication;
 use Joomla\Input\Input;
@@ -116,10 +117,11 @@ class ItemController extends Controller {
         }
 
         // On ne prend que le premier des ids.
-        $id = (int) $id[0];
+        $id = (int)$id[0];
 
         // On modifie l'input pour mettre l'id.
-        $this->getInput()->set('id', $id);
+        $this->getInput()
+             ->set('id', $id);
 
         // On contrôle les droits.
         if (!$this->allowEdit($id)) {
@@ -202,7 +204,7 @@ class ItemController extends Controller {
         $model    = $this->getModel();
         $input    = $this->getInput();
         $data     = $input->get('etdform', array(), 'array');
-        $recordId = (int) $data['id'];
+        $recordId = (int)$data['id'];
 
         // Contrôle d'accès.
         if (!$this->allowSave($recordId)) {
@@ -210,6 +212,8 @@ class ItemController extends Controller {
 
             return false;
         }
+
+        $this->beforeSave($model, $data);
 
         // On filtre les données
         $data = $model->filter($data);
@@ -247,17 +251,22 @@ class ItemController extends Controller {
             $app->setUserState($this->getName() . '.edit.data', $data);
 
             // On renvoi vers le formulaire.
-            $this->redirect("/" . $this->itemRoute . $this->getRedirectToItemAppend($recordId), Text::sprintf('JLIB_APPLICATION_ERROR_SAVE_FAILED', $model->getError()), 'error');
+            $this->redirect("/" . $this->itemRoute . $this->getRedirectToItemAppend($recordId), Text::sprintf('APP_ERROR_CTRL_SAVE_FAILED', $model->getError()), 'error');
 
             return false;
 
         }
+
+        // On invoque la méthode afterSave pour permettre aux contrôleurs enfants d'accéder au modèle.
+        $this->afterSave($model, $data);
 
         // On nettoie les informations d'édition de l'enregistrement dans la session.
         $app->setUserState($this->getName() . '.edit.data', null);
 
         // On redirige vers la page de listing.
         $this->redirect("/" . $this->listRoute, Text::_('CTRL_' . strtoupper($this->getName()) . '_SAVE_SUCCESS'), 'success');
+
+        return true;
 
     }
 
@@ -427,6 +436,32 @@ class ItemController extends Controller {
         }
 
         return $append;
+    }
+
+    /**
+     * Méthode qui permet aux controllers enfants d'accéder
+     * aux données et au modèle avant la sauvegarde.
+     *
+     * @param   Model $model Le modèle.
+     * @param   array $data  Les données.
+     *
+     * @return  void
+     */
+    protected function beforeSave(Model &$model, &$data) {
+
+    }
+
+    /**
+     * Méthode qui permet aux controllers enfants d'accéder
+     * aux données et au modèle après la sauvegarde.
+     *
+     * @param   Model $model Le modèle.
+     * @param   array $data  Les données.
+     *
+     * @return  void
+     */
+    protected function afterSave(Model &$model, $data = array()) {
+
     }
 
 }
