@@ -12,6 +12,7 @@ namespace EtdSolutions\Framework\Application;
 
 use EtdSolutions\Framework\Controller\ErrorController;
 use EtdSolutions\Framework\Document\Document;
+use EtdSolutions\Framework\User\User;
 use Joomla\Application\AbstractWebApplication;
 use Joomla\Database\DatabaseFactory;
 use Joomla\Database\DatabaseDriver;
@@ -71,9 +72,6 @@ final class Web extends AbstractWebApplication {
         $config = new Registry(new \JConfig());
 
         parent::__construct($input, $config, $client);
-
-        // On initialise la langue.
-        $this->getLanguage();
     }
 
     /**
@@ -81,13 +79,10 @@ final class Web extends AbstractWebApplication {
      *
      * @return \Joomla\Input\Input
      */
-    public function getInput()
-    {
+    public function getInput() {
 
         return $this->input;
     }
-
-
 
     /**
      * Retourne une référence à l'objet global Web, en le créant seulement si besoin.
@@ -229,12 +224,12 @@ final class Web extends AbstractWebApplication {
 
             // Get a base URL to prepend from the requested URI.
             $prefix = $uri->toString(array(
-                                         'scheme',
-                                         'user',
-                                         'pass',
-                                         'host',
-                                         'port'
-                                     ));
+                'scheme',
+                'user',
+                'pass',
+                'host',
+                'port'
+            ));
 
             // We just need the prefix since we have a path relative to the root.
             if ($url[0] == '/') {
@@ -385,6 +380,7 @@ final class Web extends AbstractWebApplication {
     }
 
     public function getActiveController() {
+
         return $this->_activeController;
     }
 
@@ -515,6 +511,24 @@ final class Web extends AbstractWebApplication {
         // On crée la session dans la base de données.
         $this->createDbSession();
 
+        // On personnalise l'environnement suivant l'utilisateur dans la session.
+        $user = $session->get('user');
+        if ($user) {
+
+            $language = $user->params->get('language');
+
+            // On s'assure que la langue de l'utilisateur existe.
+            if ($language && Language::exists($language)) {
+                $this->set('language', $language);
+            }
+
+            $timezone = $user->params->get('timezone');
+            if ($timezone) {
+                $this->set('timezone', $timezone);
+            }
+
+        }
+
         // On instancie le routeur.
         $this->router = new Router($this->input);
         $this->router->setControllerPrefix($this->get('controller_prefix'));
@@ -523,7 +537,11 @@ final class Web extends AbstractWebApplication {
         // On définit les routes.
         $this->router->addMaps($this->get('routes', array()));
 
+        // On initialise la langue.
+        $this->getLanguage();
 
+        // On définit le fuseau horaire.
+        @date_default_timezone_set($this->get('timezone', 'Europe/Paris'));
 
     }
 
@@ -619,7 +637,7 @@ final class Web extends AbstractWebApplication {
             $this->mimeType = 'application/json';
 
             // Si l'on a un code de statut HTTP.
-            if ( property_exists($result, 'status') ) {
+            if (property_exists($result, 'status')) {
                 switch ($result->status) {
                     case 400:
                         $status = '400 Bad Request';
@@ -648,6 +666,7 @@ final class Web extends AbstractWebApplication {
 
         } else {
             $this->raiseError(Text::_('APP_ERROR_INVALID_RESULT'));
+
             return false;
         }
 
@@ -657,14 +676,12 @@ final class Web extends AbstractWebApplication {
     }
 
     /**
-     * Checks the user session.
+     * Méthode pour contrôler la sesion de l'utilisateur.
      *
-     * If the session record doesn't exist, initialise it.
-     * If session is new, create session variables
+     * Si l'enregistrement de la session n'existe pas, on l'initialise.
+     * Si la session est nouvelle, on créer les variables de session.
      *
      * @return  void
-     *
-     * @since   11.1
      */
     protected function createDbSession() {
 
@@ -681,7 +698,7 @@ final class Web extends AbstractWebApplication {
             $db->setQuery($query, 0, 1);
             $exists = $db->loadResult();
 
-            // If the session record doesn't exist initialise it.
+            // Si la session n'existe pas, on l'initialise.
             if (!$exists) {
                 $query->clear();
                 if ($session->isNew()) {
@@ -698,7 +715,7 @@ final class Web extends AbstractWebApplication {
                     $db->setQuery($query);
                 }
 
-                // If the insert failed, exit the application.
+                // Si l'insertion a échoué, on quitte l'application.
                 $db->execute();
             }
 
