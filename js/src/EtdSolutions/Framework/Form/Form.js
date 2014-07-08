@@ -149,10 +149,10 @@ EtdSolutions.Framework.Form = {
     onListBtnClick: function(e) {
         e.preventDefault();
         var target = $(e.delegateTarget), data = target.attr('href').split('/').splice(1);
-        this.$form.attr('action', '/' + data[0]);
-        this.$form.find('input[name=\"task\"]').val(data[1]);
         this.$form.find('.list-col-cb input').prop('checked', false);
-        this.$form.find('input[type=\"checkbox\"][value=\"' + data[2] + '\"]').prop('checked', true);
+        this.$form.find('input[type=\"checkbox\"][value=\"' + data.pop() + '\"]').prop('checked', true);
+        this.$form.find('input[name=\"task\"]').val(data.pop());
+        this.$form.attr('action', '/' + data.join("/"));
         this.$form.submit();
     },
 
