@@ -11,10 +11,13 @@
 namespace EtdSolutions\Framework\Table;
 
 use EtdSolutions\Framework\Application\Web;
+use Joomla\Crypt\Crypt;
+use Joomla\Crypt\Password\Simple;
 use Joomla\Data\DataObject;
 use Joomla\Date\Date;
 use Joomla\Language\Text;
 use Joomla\Registry\Registry;
+use Joomla\Utilities\ArrayHelper;
 
 defined('_JEXEC') or die;
 
@@ -55,13 +58,61 @@ class UserTable extends Table {
 
     public function bind($properties, $updateNulls = true) {
 
+        // On génère le mot de passe crypté si besoin.
+        if (array_key_exists('password', $properties) && !empty($properties['password']) && substr($properties['password'], 0, 4) != '$2a$' && substr($properties['password'], 0, 4) != '$2y$') {
+            $simpleAuth             = new Simple();
+            $properties['password'] = $simpleAuth->create($properties['password']);
+        }
+
         // On convertit le tableau de droit en JSON.
         if (array_key_exists('rights', $properties) && is_array($properties['rights'])) {
-            $registry = new Registry($properties['rights']);
+            $registry             = new Registry($properties['rights']);
             $properties['rights'] = $registry->toString();
         }
 
+        // On convertit le tableau de paramètres en JSON.
+        if (array_key_exists('params', $properties) && is_array($properties['params'])) {
+            $registry             = new Registry($properties['params']);
+            $properties['params'] = $registry->toString();
+        }
+
         return parent::bind($properties, $updateNulls);
+    }
+
+    public function check() {
+
+        $pk = $this->getProperty($this->getPk());
+
+        $db = Web::getInstance()
+                 ->getDb();
+
+        // Date actuelle.
+        $date = new Date();
+        $now  = $date->format($db->getDateFormat());
+
+        // On regarde si c'est un nouvel utilisateur ou non.
+        if (empty($pk)) {
+
+            // On contrôle le mot de passe et on crée le mot de passe crypté si besoin.
+            if (empty($this->password)) {
+                $simpleAuth = new Simple();
+                $this->setProperty('password', $simpleAuth->create($this->genRandomPassword()));
+            }
+
+            // On définit la date d'inscription.
+            $this->setProperty('registerDate', $now);
+
+        }
+
+        // On contrôle que le nom d'utilisateur n'est pas plus long que 150 caractères.
+        $username = $this->getProperty('username');
+
+        if (strlen($username) > 150) {
+            $username = substr($username, 0, 150);
+            $this->setProperty('username', $username);
+        }
+
+        return true;
     }
 
     public function setLastVisit($date = null, $pk = null) {
@@ -104,6 +155,37 @@ class UserTable extends Table {
 
         return true;
 
+    }
+
+    /**
+     * Génère un mot de passe aléatoire.
+     *
+     * @param   integer $length Longueur du mot de passe à générer.
+     *
+     * @return  string  Le mot de passe aléatoire.
+     */
+    protected function genRandomPassword($length = 8) {
+
+        $salt     = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $base     = strlen($salt);
+        $makepass = '';
+
+        /*
+         * Start with a cryptographic strength random string, then convert it to
+         * a string with the numeric base of the salt.
+         * Shift the base conversion on each character so the character
+         * distribution is even, and randomize the start shift so it's not
+         * predictable.
+         */
+        $random = Crypt::genRandomBytes($length + 1);
+        $shift  = ord($random[0]);
+
+        for ($i = 1; $i <= $length; ++$i) {
+            $makepass .= $salt[($shift + ord($random[$i])) % $base];
+            $shift += ord($random[$i]);
+        }
+
+        return $makepass;
     }
 
 }
