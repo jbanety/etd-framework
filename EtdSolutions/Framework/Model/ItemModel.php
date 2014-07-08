@@ -174,14 +174,14 @@ abstract class ItemModel extends Model {
      * Méthode pour ne valider qu'un seul champ suivant les règles du formulaire associé au modèle.
      *
      * @param $name  string Le nom du champ.
-     * @param $data mixed Les données à tester.
+     * @param $data  mixed Les données à tester.
      *
      * @return boolean True si valide, false sinon.
      */
     public function validateField($name, $data) {
 
-        $form  = $this->getForm();
-        $ret   = $form->validate($data, null, $name);
+        $form = $this->getForm();
+        $ret  = $form->validate($data, null, $name);
 
         // Si le champ n'est pas valide, on stocke les erreurs dans le modèle.
         if ($ret === false) {
@@ -304,7 +304,9 @@ abstract class ItemModel extends Model {
         // On nettoie le cache.
         $this->cleanCache();
 
-        // On met à jour la session.
+        // On met à jour l'état du modèle.
+        $this->__state_set = true;
+
         $pkName = $table->getPk();
         if (isset($table->$pkName)) {
             $this->set($this->context . '.id', $table->$pkName);
