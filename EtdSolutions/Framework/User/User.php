@@ -26,7 +26,6 @@ class User extends DataObject {
      */
     protected static $instances = array();
 
-
     /**
      * Instancie l'objet utilisateur.
      *
@@ -43,7 +42,8 @@ class User extends DataObject {
                 'id'        => 0,
                 'sendEmail' => 0,
                 'guest'     => 1,
-                'rights'    => new Registry
+                'rights'    => new Registry,
+                'params'    => new Registry
             );
         }
 
@@ -63,7 +63,7 @@ class User extends DataObject {
         $instance = $app->getSession()
                         ->get('user');
 
-        if (is_null($id) || (!is_null($instance) && $instance->id == $id)){
+        if (is_null($id) || (!is_null($instance) && $instance->id == $id)) {
 
             if (!($instance instanceof User)) {
                 return new User;
@@ -166,6 +166,12 @@ class User extends DataObject {
 
             // On transforme les droits en objet registre.
             $user->rights = new Registry($user->rights);
+
+            // On transforme les paramètres en registre.
+            $user->params = new Registry($user->params);
+
+            // On vire le mot de passe.
+            $user->password = '';
 
         }
 
