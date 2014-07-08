@@ -70,4 +70,20 @@ class Form extends JoomlaForm {
 
     }
 
+    /**
+     * On rend la méthode publique.
+     */
+    public function &findFieldsByFieldset($name) {
+
+        return parent::findFieldsByFieldset($name);
+    }
+
+    /**
+     * On rend la méthode publique.
+     */
+    public function &findFieldsByGroup($group = null, $nested = false) {
+
+        return parent::findFieldsByGroup($group, $nested);
+    }
+
 }
