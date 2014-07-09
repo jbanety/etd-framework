@@ -358,7 +358,7 @@ class ItemController extends Controller {
     protected function allowAdd() {
 
         return User::getInstance()
-                   ->authorise('create', $this->getName());
+                   ->authorise('add', $this->getName());
     }
 
     /**
