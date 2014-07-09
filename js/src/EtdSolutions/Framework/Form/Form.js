@@ -16,7 +16,14 @@ EtdSolutions.Framework.Form = {
         token: null,
         data: {},
         itemView: null,
-        listView: null
+        listView: null,
+        selectors: {
+            checkboxes: '.list-col-cb input',
+            itemButtons: '.btn-list',
+            limitInput: '#limit',
+            checkAll: 'input[name="checkAll"]',
+            taskInput: 'input[name="task"]'
+        }
     },
 
     init: function(form, options) {
@@ -24,8 +31,9 @@ EtdSolutions.Framework.Form = {
         $.extend(true, this.options, options);
 
         // On lie les événements
-        this.$form.find('.btn-list').on('click', $.proxy(this.onListBtnClick, this));
-        $('#limit').on('change', $.proxy(this.onLimitChange, this));
+        this.$form.find(this.options.selectors.itemButtons).on('click', $.proxy(this.onListBtnClick, this));
+        $(this.options.selectors.limitInput).on('change', $.proxy(this.onLimitChange, this));
+        this.$form.find(this.options.selectors.checkAll).on('change', $.proxy(this.onCheckAllChange, this));
 
         return this;
     },
@@ -102,7 +110,7 @@ EtdSolutions.Framework.Form = {
         var self = this;
         $('#' + btnId).on('click', function(e) {
             e.preventDefault();
-            if (self.$form.find('input[type=checkbox]:checked').length > 0) {
+            if (self.$form.find(this.options.selectors.checkboxes + ':checked').length > 0) {
                 self.submitTask(task, self.options.itemView);
             } else {
                 alert(EtdSolutions.Framework.Language.Text._('APP_ERROR_NO_ITEM_SELECTED'));
@@ -137,7 +145,7 @@ EtdSolutions.Framework.Form = {
         if (action) {
             this.$form.attr('action', '/' + action);
         }
-        this.$form.find('input[name=\"task\"]').val(task);
+        this.$form.find(this.options.selectors.taskInput).val(task);
         this.$form.submit();
         return this;
     },
@@ -149,17 +157,24 @@ EtdSolutions.Framework.Form = {
     onListBtnClick: function(e) {
         e.preventDefault();
         var target = $(e.delegateTarget), data = target.attr('href').split('/').splice(1);
-        this.$form.find('.list-col-cb input').prop('checked', false);
-        this.$form.find('input[type=\"checkbox\"][value=\"' + data.pop() + '\"]').prop('checked', true);
-        this.$form.find('input[name=\"task\"]').val(data.pop());
+        this.$form.find(this.options.selectors.checkboxes).prop('checked', false);
+        this.$form.find(this.options.selectors.checkboxes + '[value="' + data.pop() + '"]').prop('checked', true);
+        this.$form.find(this.options.selectors.taskInput).val(data.pop());
         this.$form.attr('action', '/' + data.join("/"));
         this.$form.submit();
+        return this;
     },
 
     onLimitChange: function(e) {
         e.preventDefault();
         this.$form.attr('action', '/' + this.options.listView);
         this.$form.submit();
+        return this;
+    },
+
+    onCheckAllChange: function(e) {
+        this.$form.find(this.options.selectors.checkboxes).prop('checked', $(this.options.selectors.checkAll).prop('checked'));
+        return this;
     }
 
 };
