@@ -148,7 +148,7 @@ class UserTable extends Table {
         // On met à jour la ligne.
         $db->setQuery($db->getQuery(true)
                          ->update($this->table)
-                         ->set($db->quoteName('lastvisitDate'), $formated_date)
+                         ->set($db->quoteName('lastvisitDate') . " = " . $db->quote($formated_date))
                          ->where($db->quoteName($this->pk) . ' = ' . $db->quote($pk)));
 
         $db->execute();
