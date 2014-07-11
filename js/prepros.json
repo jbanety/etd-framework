@@ -1,0 +1,120 @@
+{
+  "id": "3ce6aee5",
+  "cfgVersion": 1,
+  "name": "Framework JS",
+  "files": {
+    "0fd04f3c": {
+      "id": "0fd04f3c",
+      "pid": "3ce6aee5",
+      "name": "EtdSolutions.js",
+      "input": "dist/EtdSolutions.js",
+      "customOutput": "dist/EtdSolutions.min.js",
+      "type": "Js",
+      "config": {
+        "autoCompile": true,
+        "uglify": false,
+        "mangle": true,
+        "sourcemaps": false
+      }
+    },
+    "c699366e": {
+      "id": "c699366e",
+      "pid": "3ce6aee5",
+      "name": "build.js",
+      "input": "src/build.js",
+      "customOutput": "dist/EtdSolutions.js",
+      "type": "Js",
+      "config": {
+        "autoCompile": true,
+        "uglify": false,
+        "mangle": true,
+        "sourcemaps": false
+      }
+    }
+  },
+  "imports": {
+    "60e4d8ba": {
+      "id": "60e4d8ba",
+      "pid": "3ce6aee5",
+      "path": "dependencies/sprintf.js",
+      "parents": [
+        "c699366e"
+      ]
+    },
+    "e50cc2a0": {
+      "id": "e50cc2a0",
+      "pid": "3ce6aee5",
+      "path": "src/EtdSolutions/EtdSolutions.js",
+      "parents": [
+        "c699366e"
+      ]
+    },
+    "c3d8561b": {
+      "id": "c3d8561b",
+      "pid": "3ce6aee5",
+      "path": "src/EtdSolutions/Framework/Framework.js",
+      "parents": [
+        "c699366e"
+      ]
+    },
+    "ef191a74": {
+      "id": "ef191a74",
+      "pid": "3ce6aee5",
+      "path": "src/EtdSolutions/Framework/Form/Form.js",
+      "parents": [
+        "c699366e"
+      ]
+    },
+    "f6ab0b76": {
+      "id": "f6ab0b76",
+      "pid": "3ce6aee5",
+      "path": "src/EtdSolutions/Framework/Language/Language.js",
+      "parents": [
+        "c699366e"
+      ]
+    },
+    "f232a141": {
+      "id": "f232a141",
+      "pid": "3ce6aee5",
+      "path": "src/EtdSolutions/Framework/Language/Text.js",
+      "parents": [
+        "c699366e"
+      ]
+    }
+  },
+  "images": {},
+  "config": {
+    "watch": true,
+    "liveRefresh": true,
+    "liveRefreshDelay": 0,
+    "filterPatterns": "",
+    "useCustomServer": false,
+    "customServerUrl": "",
+    "cssPath": "css/",
+    "jsPath": "js/",
+    "htmlPath": "html/",
+    "minJsPath": "min/",
+    "htmlExtension": ".html",
+    "cssPathType": "REPLACE_TYPE",
+    "htmlPathType": "REPLACE_TYPE",
+    "jsPathType": "REPLACE_TYPE",
+    "minJsPathType": "SIDE_BY_FILE",
+    "htmlTypes": "jade, haml, slim, markdown, md",
+    "cssTypes": "less, sass, stylus, scss, styl",
+    "jsTypes": "coffee, coffeescript, coffeescripts, ls, livescript, livescripts",
+    "cssPreprocessorPath": "",
+    "htmlPreprocessorPath": "",
+    "jsPreprocessorPath": "",
+    "minJsPreprocessorPath": "",
+    "autoprefixerBrowsers": "",
+    "ftpHost": "",
+    "ftpPort": "21",
+    "ftpRemotePath": "",
+    "ftpIgnorePreprocessorFiles": true,
+    "ftpType": "FTP",
+    "ftpExcludePatterns": "",
+    "ftpSecure": false,
+    "ftpPassword": "",
+    "ftpUsername": ""
+  }
+}
