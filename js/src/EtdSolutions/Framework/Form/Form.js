@@ -110,7 +110,7 @@ EtdSolutions.Framework.Form = {
         var self = this;
         $('#' + btnId).on('click', function(e) {
             e.preventDefault();
-            if (self.$form.find(this.options.selectors.checkboxes + ':checked').length > 0) {
+            if (self.$form.find(self.options.selectors.checkboxes + ':checked').length > 0) {
                 self.submitTask(task, self.options.itemView);
             } else {
                 alert(EtdSolutions.Framework.Language.Text._('APP_ERROR_NO_ITEM_SELECTED'));
