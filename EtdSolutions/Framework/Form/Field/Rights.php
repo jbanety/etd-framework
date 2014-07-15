@@ -41,6 +41,7 @@ class Field_Rights extends Field {
         }
 
         $class = $this->element['class'] ? ' ' . (string)$this->element['class'] : '';
+        $readonly = isset($this->element['readonly']) ? (bool)$this->element['readonly'] : false;
 
         $html[] = '<table class="rights table table-condensed' . $class . '">';
 
@@ -86,10 +87,21 @@ class Field_Rights extends Field {
                 $html[] = '<td class="action"><span class="hasTooltip" title="' . Text::_($action->description) . '">' . Text::_($action->title) . '</td>';
 
                 $html[] = '<td class="right">';
-                $html[] = '<div class="btn-group" data-toggle="buttons">';
-                $html[] = '<label class="btn btn-default btn-sm' . $labelClass1 . '"><input name="' . $this->name . '[' . $section->name . '][' . $action->name . ']" value="1" type="checkbox"' . $checked1 . '> ' . Text::_('APP_GLOBAL_YES') . '</label>';
-                $html[] = '<label class="btn btn-default btn-sm' . $labelClass0 . '"><input name="' . $this->name . '[' . $section->name . '][' . $action->name . ']" value="0" type="checkbox"' . $checked0 . '> ' . Text::_('APP_GLOBAL_NO') . '</label>';
-                $html[] = '</div>';
+
+                // Lecture seule
+                if ($readonly) {
+                    if (empty($checked0)) {
+                        $html[] = Text::_('APP_GLOBAL_YES');
+                    } else {
+                        $html[] = Text::_('APP_GLOBAL_NO');
+                    }
+                } else {
+                    $html[] = '<div class="btn-group" data-toggle="buttons">';
+                    $html[] = '<label class="btn btn-default btn-sm' . $labelClass1 . '"><input name="' . $this->name . '[' . $section->name . '][' . $action->name . ']" value="1" type="radio"' . $checked1 . '> ' . Text::_('APP_GLOBAL_YES') . '</label>';
+                    $html[] = '<label class="btn btn-default btn-sm' . $labelClass0 . '"><input name="' . $this->name . '[' . $section->name . '][' . $action->name . ']" value="0" type="radio"' . $checked0 . '> ' . Text::_('APP_GLOBAL_NO') . '</label>';
+                    $html[] = '</div>';
+                }
+
                 $html[] = '</td>';
 
                 $html[] = '</tr>';

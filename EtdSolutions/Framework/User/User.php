@@ -178,4 +178,37 @@ class User extends DataObject {
         return $user;
     }
 
+    /**
+     * Méthode pour déconnecter l'utilisateur.
+     *
+     * @return bool True si succès.
+     */
+    public function logout() {
+
+        $my      = self::getInstance();
+        $session = Web::getInstance()
+                      ->getSession();
+        $db      = Web::getInstance()
+                      ->getDb();
+
+        // Est-on en train de supprimer la session en cours ?
+        if ($my->id == $this->id) {
+
+            // On met à jour la dernière visite.
+            $this->setLastVisit();
+
+            // On supprime la session PHP.
+            $session->destroy();
+        }
+
+        // On force la déconnexion de tous les utilisateurs avec cet id.
+        $db->setQuery($db->getQuery(true)
+                         ->delete($db->quoteName('#__session'))
+                         ->where($db->quoteName('userid') . ' = ' . (int)$this->id))
+           ->execute();
+
+        return true;
+
+    }
+
 }
