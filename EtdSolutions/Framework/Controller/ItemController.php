@@ -74,7 +74,7 @@ class ItemController extends Controller {
             }
         }
 
-        return parent::__construct($input, $app);
+        parent::__construct($input, $app);
     }
 
     /**
