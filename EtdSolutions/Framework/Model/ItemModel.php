@@ -18,7 +18,6 @@ use EtdSolutions\Framework\Form\Form;
 use Joomla\Form\FormHelper;
 use Joomla\Language\Text;
 use Joomla\Registry\Registry;
-use Joomla\String\String;
 
 defined('_JEXEC') or die;
 
@@ -85,6 +84,12 @@ abstract class ItemModel extends Model {
 
         // On récupère les données de l'élément.
         $item = $table->dump(0);
+
+        // On transforme le champ params JSON en tableau.
+        if (isset($item->params) && is_string($item->params)) {
+            $reg          = new Registry($item->params);
+            $item->params = $reg->toArray();
+        }
 
         return $item;
 
