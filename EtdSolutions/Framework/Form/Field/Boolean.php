@@ -39,13 +39,13 @@ class Field_Boolean extends Field {
         $checked0 = '';
         $active0  = '';
 
-        if ($this->value) {
+        if (isset($this->value)) {
 
             $value    = (bool)$this->value;
             $checked1 = $value ? ' checked="checked"' : '';
             $active1  = $value ? ' active' : '';
             $checked0 = !$value ? ' checked="checked"' : '';
-            $active0  = $value ? ' active' : '';
+            $active0  = !$value ? ' active' : '';
 
         }
 
