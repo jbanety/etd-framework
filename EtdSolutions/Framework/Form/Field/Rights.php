@@ -63,15 +63,18 @@ class Field_Rights extends Field {
             foreach ($section->actions as $i => $action) {
 
                 $labelClass1 = '';
-                $labelClass0 = '';
                 $checked1 = '';
-                $checked0 = '';
+                $labelClass0 = ' active';
+                $checked0 = ' checked';
+                $hasValue = $value->exists($section->name . "." . $action->name);
 
-                if ($value && $value->exists($section->name . "." . $action->name)) {
+                if ($value && $hasValue) {
                     $v = $value->get($section->name . "." . $action->name, false);
                     if ($v) {
                         $labelClass1 = ' active';
                         $checked1 = ' checked';
+                        $labelClass0 = '';
+                        $checked0 = '';
                     } else {
                         $labelClass0 = ' active';
                         $checked0 = ' checked';
@@ -90,7 +93,7 @@ class Field_Rights extends Field {
 
                 // Lecture seule
                 if ($readonly) {
-                    if (empty($checked0)) {
+                    if ($hasValue && empty($checked0)) {
                         $html[] = Text::_('APP_GLOBAL_YES');
                     } else {
                         $html[] = Text::_('APP_GLOBAL_NO');
