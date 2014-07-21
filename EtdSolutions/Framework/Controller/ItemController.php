@@ -13,6 +13,7 @@ namespace EtdSolutions\Framework\Controller;
 use EtdSolutions\Framework\Application\Web;
 use EtdSolutions\Framework\Model\ItemModel;
 use EtdSolutions\Framework\Model\Model;
+use EtdSolutions\Framework\Table\Table;
 use EtdSolutions\Framework\User\User;
 use Joomla\Application\AbstractApplication;
 use Joomla\Input\Input;
@@ -238,7 +239,7 @@ class ItemController extends Controller {
             // On sauvegarde les données dans la session.
             $app->setUserState($this->getName() . '.edit.data', $data);
 
-            // On renvoi vers le formulaire.
+            // on renvoie vers le formulaire.
             $this->redirect("/" . $this->itemRoute . $this->getRedirectToItemAppend($recordId));
 
             return false;
@@ -250,7 +251,7 @@ class ItemController extends Controller {
             // On sauvegarde les données VALIDÉES dans la session.
             $app->setUserState($this->getName() . '.edit.data', $data);
 
-            // On renvoi vers le formulaire.
+            // on renvoie vers le formulaire.
             $this->redirect("/" . $this->itemRoute . $this->getRedirectToItemAppend($recordId), Text::sprintf('APP_ERROR_CTRL_SAVE_FAILED', $model->getError()), 'error');
 
             return false;
@@ -462,6 +463,19 @@ class ItemController extends Controller {
      */
     protected function afterSave(Model &$model, $data = array()) {
 
+    }
+
+    /**
+     * Méthode pour récupérer le table associé au controller.
+     *
+     * @param string $name Le nom du table.
+     * @return Table
+     */
+    protected function getTable($name = null) {
+        if (!isset($name)) {
+            $name = $this->getName();
+        }
+        return Table::getInstance($name);
     }
 
 }
