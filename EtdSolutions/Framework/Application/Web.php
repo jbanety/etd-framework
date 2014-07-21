@@ -601,7 +601,7 @@ final class Web extends AbstractWebApplication {
      * Effectue le rendu de l'application.
      *
      * Le rendu est le résultat du traitement du résultat du contrôleur.
-     * Si c'est une chaine de caractère on assume que c'est de l'HTML et donc on renvoi
+     * Si c'est une chaine de caractère on assume que c'est de l'HTML et donc on renvoie
      * du text/html. Dans le cas contraire, on transforme le résultat en chaine de
      * caractère au format JSON.
      *
