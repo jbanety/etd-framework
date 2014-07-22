@@ -258,6 +258,9 @@ abstract class Table extends DataObject {
             $result = $db->updateObject($this->table, $properties, $this->pk, $updateNulls);
         } else {
             $result = $db->insertObject($this->table, $properties, $this->pk);
+
+            // On met à jour la nouvelle clé primaire dans le table.
+            $this->setProperty($this->pk, $properties->{$this->pk});
         }
 
         return $result;
