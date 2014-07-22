@@ -214,11 +214,12 @@ abstract class ItemsModel extends Model {
         }
 
         // On tente de charger les données depuis la session.
-        $data = $app->getUserState($this->context.'.filters', new \stdClass);
+        $data = array();
+        $data['filter'] = $app->getUserState($this->context.'.filter', array());
 
         // Si on a pas de données, on prérempli quelques options.
-        if (!property_exists($data, 'list')) {
-            $data->list = array(
+        if (!array_key_exists('list', $data['filter'])) {
+            $data['filter']['list'] = array(
                 'direction' => $this->get('list.direction'),
                 'limit'     => $this->get('list.limit'),
                 'ordering'  => $this->get('list.ordering'),
