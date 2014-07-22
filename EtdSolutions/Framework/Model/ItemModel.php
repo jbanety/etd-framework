@@ -127,10 +127,12 @@ abstract class ItemModel extends Model {
         // On ajoute le chemin vers les fichiers XML.
         FormHelper::addFormPath(JPATH_FORMS);
 
-        // On ajoute le chemin vers les types de champs.
+        // On ajoute le chemin vers les types de champs et les règles.
         $app  = Web::getInstance();
         $path = Path::clean(JPATH_LIBRARIES . $app->get('app_namespace') . "/Form/Field");
         FormHelper::addFieldPath($path);
+        $path = Path::clean(JPATH_LIBRARIES . $app->get('app_namespace') . "/Form/Rule");
+        FormHelper::addRulePath($path);
 
         // On charge les champs depuis le XML.
         if (!$form->loadFile($name)) {
