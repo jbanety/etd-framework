@@ -284,6 +284,9 @@ abstract class ItemModel extends Model {
             $isNew = false;
         }
 
+        // On prépare le table avant de lier les données.
+        $this->beforeTableBinding($table, $data, $isNew);
+
         // On relie les données
         if (!$table->bind($data)) {
             $this->setError($table->getError());
@@ -472,6 +475,19 @@ abstract class ItemModel extends Model {
      * @param Table $table Une référence à un objet Table.
      */
     protected function prepareDuplicatedTable(Table &$table) {
+
+        // Les classes dérivées pourront l'implémenter si besoin.
+
+    }
+
+    /**
+     * Prépare le Table avant de lui lier des données.
+     *
+     * @param Table $table Une référence à un objet Table.
+     * @param array $data  Les données à lui lier.
+     * @param bool  $isNew True si c'est un nouvel enregistrement, false sinon.
+     */
+    protected function beforeTableBinding(Table &$table, &$data, $isNew = false) {
 
         // Les classes dérivées pourront l'implémenter si besoin.
 
