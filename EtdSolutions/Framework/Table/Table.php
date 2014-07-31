@@ -20,7 +20,7 @@ defined('_JEXEC') or die;
 
 /**
  * Représentation d'une table dans la base de données.
- */
+*/
 abstract class Table extends DataObject {
 
     /**
@@ -42,6 +42,11 @@ abstract class Table extends DataObject {
      * @var array Les erreurs survenues dans le table.
      */
     protected $errors = array();
+
+    /**
+     * @var bool Indique si la table est bloquée.
+     */
+    protected $locked = false;
 
     /**
      * @var  Table  Les instances des tables.
@@ -213,10 +218,10 @@ abstract class Table extends DataObject {
     public function bind($source, $updateNulls = true, $ignore = array()) {
 
         // On s'assure que la source est un tableau.
-        $source = (array) $source;
+        $source = (array)$source;
 
         // On ne garde que les données liables avec le tableau.
-        $source = array_intersect_key($source, (array) $this->dump(0));
+        $source = array_intersect_key($source, (array)$this->dump(0));
 
         // On supprime les champs ignorés.
         $source = array_diff_key($source, array_fill_keys($ignore, null));
@@ -387,6 +392,47 @@ abstract class Table extends DataObject {
     public function hasError() {
 
         return (count($this->errors) > 0);
+    }
+
+    /**
+     * Méthode pour verrouiller une table dans la base.
+     *
+     * @return  boolean  True en cas de succès.
+     *
+     * @throws  \RuntimeException
+     */
+    protected function lock() {
+
+        $this->getDb()->lockTable($this->getTable());
+        $this->locked = true;
+
+        return true;
+    }
+
+    /**
+     * Method to unlock the database table for writing.
+     *
+     * @return  boolean  True on success.
+     *
+     * @since   11.1
+     */
+    protected function unlock() {
+
+        $this->getDb()->unlockTables();
+        $this->locked = false;
+
+        return true;
+    }
+
+    /**
+     * Méthode pour renvoyer l'objet global de base de données.
+     *
+     * @return \Joomla\Database\DatabaseDriver
+     */
+    protected function getDb() {
+
+        return Web::getInstance()
+                  ->getDb();
     }
 
 }
