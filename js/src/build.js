@@ -10,6 +10,7 @@
 // -- begin dependencies
 
 // @prepros-append "../dependencies/sprintf.js"
+// @prepros-append "../dependencies/jquery.tablednd.js"
 
 // -- end dependencies
 // -- begin framework

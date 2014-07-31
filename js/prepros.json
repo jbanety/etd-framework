@@ -3,6 +3,20 @@
   "cfgVersion": 1,
   "name": "Framework JS",
   "files": {
+    "29997775": {
+      "id": "29997775",
+      "pid": "3ce6aee5",
+      "name": "jquery.sortable.js",
+      "input": "dependencies/jquery.sortable.js",
+      "customOutput": false,
+      "type": "Js",
+      "config": {
+        "autoCompile": true,
+        "uglify": true,
+        "mangle": true,
+        "sourcemaps": false
+      }
+    },
     "0fd04f3c": {
       "id": "0fd04f3c",
       "pid": "3ce6aee5",
@@ -33,6 +47,14 @@
     }
   },
   "imports": {
+    "54895686": {
+      "id": "54895686",
+      "pid": "3ce6aee5",
+      "path": "dependencies/jquery.tablednd.js",
+      "parents": [
+        "c699366e"
+      ]
+    },
     "60e4d8ba": {
       "id": "60e4d8ba",
       "pid": "3ce6aee5",
