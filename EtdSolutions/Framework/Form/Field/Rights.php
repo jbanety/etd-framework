@@ -66,9 +66,9 @@ class Field_Rights extends Field {
                 $checked1 = '';
                 $labelClass0 = ' active';
                 $checked0 = ' checked';
-                $hasValue = $value->exists($section->name . "." . $action->name);
+                $hasValue = $value && $value->exists($section->name . "." . $action->name);
 
-                if ($value && $hasValue) {
+                if ($hasValue) {
                     $v = $value->get($section->name . "." . $action->name, false);
                     if ($v) {
                         $labelClass1 = ' active';
