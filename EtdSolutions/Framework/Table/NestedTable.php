@@ -944,9 +944,14 @@ abstract class NestedTable extends Table {
         // On construit la strucuture de la requête récursive.
         if (!isset($this->cache['rebuild.sql'])) {
             $query->clear()
-                  ->select($this->getPk() . ', alias')
                   ->from($this->getTable())
                   ->where('parent_id = %d');
+
+            if (property_exists($this, 'alias')) {
+                $query->select($this->getPk() . ', alias');
+            } else {
+                $query->select($this->getPk());
+            }
 
             // Si la table a un champ d'ordre, on l'utilise.
             if (property_exists($this, 'ordering')) {
@@ -974,7 +979,11 @@ abstract class NestedTable extends Table {
              * On incrémente le niveau de tous les enfants.
              * On ajoute l'alias de l'élément au chemin
              */
-            $rightId = $this->rebuild($node->{$this->getPk()}, $rightId, $level + 1, $path . (empty($path) ? '' : '/') . $node->alias);
+            if (property_exists($node, 'alias')) {
+                $rightId = $this->rebuild($node->{$this->getPk()}, $rightId, $level + 1, $path . (empty($path) ? '' : '/') . $node->alias);
+            } else {
+                $rightId = $this->rebuild($node->{$this->getPk()}, $rightId, $level + 1, '');
+            }
 
             // Si il y a un problème de mise à jour, on retourne false pour arrêter la récursion.
             if ($rightId === false) {
@@ -989,9 +998,13 @@ abstract class NestedTable extends Table {
               ->set('lft = ' . (int)$leftId)
               ->set('rgt = ' . (int)$rightId)
               ->set('level = ' . (int)$level)
-              ->set('path = ' . $this->getDb()
-                                     ->quote($path))
               ->where($this->getPk() . ' = ' . (int)$parentId);
+
+        if (property_exists($this, 'path')) {
+            $query->set('path = ' . $this->getDb()
+                                         ->quote($path));
+        }
+
         $this->getDb()
              ->setQuery($query)
              ->execute();
