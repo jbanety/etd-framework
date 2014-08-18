@@ -27,8 +27,7 @@ EtdSolutions.Framework.Form = {
             orderingInput: 'input[name="list_ordering"]',
             directionInput: 'input[name="list_direction"]',
             sortableContainer: 'table',
-            sortableHandle: '.sortable-handle',
-            sortableItems: ':not(.disabled)'
+            sortableHandle: '.sortable-handle.active'
         }
     },
 
@@ -37,7 +36,7 @@ EtdSolutions.Framework.Form = {
         activeDirection: ''
     },
 
-    init: function (form, options) {
+    init: function(form, options) {
         this.$form = $(form);
         $.extend(true, this.options, options);
 
@@ -45,8 +44,7 @@ EtdSolutions.Framework.Form = {
         this.ordering.activeOrdering = this.$form.find(this.options.selectors.orderingInput).val();
         this.ordering.activeDirection = this.$form.find(this.options.selectors.directionInput).val();
 
-        this.bind()
-            .sortable();
+        this.bind().makeSortable();
 
         return this;
     },
@@ -61,37 +59,40 @@ EtdSolutions.Framework.Form = {
         return this;
     },
 
-    sortable: function() {
+    makeSortable: function() {
 
         if (this.$form.hasClass('form-sortable')) {
-
-
-
+            this.$form.find(this.options.selectors.sortableContainer).tableDnD({
+                onDragClass: 'dragging',
+                dragHandle: this.options.selectors.sortableHandle,
+                onDragStart: $.proxy(this.onSortableDragStart, this),
+                onDrop: $.proxy(this.onSortableDrop, this)
+            });
         }
 
         return this;
     },
 
-    prepareEditRow: function (row) {
+    prepareEditRow: function(row) {
 
         row = $(row);
 
         var self = this, input = row.find('.inline-edit-input');
 
-        row.find('.inline-edit-btn').on('click', function (e) {
+        row.find('.inline-edit-btn').on('click', function(e) {
             e.preventDefault();
             console.log(input.val());
             input.data('prev-value', input.val());
             row.addClass('editing');
         });
 
-        row.find('.inline-cancel-btn').on('click', function (e) {
+        row.find('.inline-cancel-btn').on('click', function(e) {
             e.preventDefault();
             input.val(input.data('prev-value'));
             row.removeClass('editing');
         });
 
-        row.find('.inline-save-btn').on('click', function (e) {
+        row.find('.inline-save-btn').on('click', function(e) {
             e.preventDefault();
 
             var data = {
@@ -100,9 +101,9 @@ EtdSolutions.Framework.Form = {
                 'value': input.val()
             };
 
-            self.postAjax(data, function (data) {
+            self.postAjax(data, function(data) {
                 row.removeClass('editing');
-            }, function (data) {
+            }, function(data) {
                 //raise error
                 input.val(input.data('prev-value'));
                 row.removeClass('editing');
@@ -114,12 +115,12 @@ EtdSolutions.Framework.Form = {
 
     },
 
-    postAjax: function (data, sucCallback, errCallback) {
+    postAjax: function(data, sucCallback, errCallback) {
 
         data = $.extend(this.options.data, data);
         data[this.options.token] = '1';
 
-        $.post(this.options.ajaxURI, data, function (data) {
+        $.post(this.options.ajaxURI, data, function(data) {
             if (data.error && errCallback) {
                 errCallback(data);
             } else if (sucCallback) {
@@ -130,19 +131,19 @@ EtdSolutions.Framework.Form = {
         return this;
     },
 
-    setAjaxURI: function (uri) {
+    setAjaxURI: function(uri) {
         this.options.ajaxURI = uri;
         return this;
     },
 
-    setAdditionnalData: function (data) {
+    setAdditionnalData: function(data) {
         this.options.data = data;
         return this;
     },
 
-    addSelectTask: function (btnId, task) {
+    addSelectTask: function(btnId, task) {
         var self = this;
-        $('#' + btnId).on('click', function (e) {
+        $('#' + btnId).on('click', function(e) {
             e.preventDefault();
             if (self.$form.find(self.options.selectors.checkboxes + ':checked').length > 0) {
                 self.submitTask(task, self.options.itemView);
@@ -153,18 +154,18 @@ EtdSolutions.Framework.Form = {
         return this;
     },
 
-    addSubmitTask: function (btnId, task, action) {
+    addSubmitTask: function(btnId, task, action) {
         var self = this;
-        $('#' + btnId).on('click', function (e) {
+        $('#' + btnId).on('click', function(e) {
             e.preventDefault();
             self.submitTask(task, action);
         });
         return this;
     },
 
-    addValidationTask: function (btnId, task, action) {
+    addValidationTask: function(btnId, task, action) {
         var self = this;
-        $('#' + btnId).on('click', function (e) {
+        $('#' + btnId).on('click', function(e) {
             e.preventDefault();
             if (self.validate()) {
                 self.submitTask(task, action);
@@ -175,7 +176,7 @@ EtdSolutions.Framework.Form = {
         return this;
     },
 
-    submitTask: function (task, action) {
+    submitTask: function(task, action) {
         if (action) {
             this.$form.attr('action', '/' + action);
         }
@@ -184,11 +185,11 @@ EtdSolutions.Framework.Form = {
         return this;
     },
 
-    validate: function () {
+    validate: function() {
         return true;
     },
 
-    onListBtnClick: function (e) {
+    onListBtnClick: function(e) {
         e.preventDefault();
         var target = $(e.delegateTarget), data = target.attr('href').split('/').splice(1);
         this.$form.find(this.options.selectors.checkboxes).prop('checked', false);
@@ -199,24 +200,23 @@ EtdSolutions.Framework.Form = {
         return this;
     },
 
-    onLimitChange: function (e) {
+    onLimitChange: function(e) {
         e.preventDefault();
         this.$form.attr('action', '/' + this.options.listView);
         this.$form.submit();
         return this;
     },
 
-    onCheckAllChange: function () {
+    onCheckAllChange: function() {
         this.$form.find(this.options.selectors.checkboxes).prop('checked', $(this.options.selectors.checkAll).prop('checked'));
         return this;
     },
 
-    onOrderingColumnClick: function (e) {
+    onOrderingColumnClick: function(e) {
         e.preventDefault();
 
         // Tri à définir
-        var newOrdering = $(e.delegateTarget).data('order'),
-            newDirection = $(e.delegateTarget).data('direction');
+        var newOrdering = $(e.delegateTarget).data('order'), newDirection = $(e.delegateTarget).data('direction');
 
         if (this.ordering.activeDirection != newDirection || this.ordering.activeOrdering != newOrdering) {
             this.ordering.activeOrdering = newOrdering;
@@ -234,17 +234,73 @@ EtdSolutions.Framework.Form = {
 
         this.$form.find(this.options.selectors.taskInput).val('saveOrder');
         /*f.find('input[name="order[]"]').each(function(index) {
-            $(this).val(index);
-        });
-        var data = f.serializeArray();
-        f.find('input[name="cid[]"]').each(function() {
-            data.push({
-                name: 'cid[]',
-                value: $(this).val()
-            });
-        });*/
+         $(this).val(index);
+         });
+         var data = f.serializeArray();
+         f.find('input[name="cid[]"]').each(function() {
+         data.push({
+         name: 'cid[]',
+         value: $(this).val()
+         });
+         });*/
         //console.log(data);
         //$.post('/projets/saveOrderAjax', data);
+    },
+
+    onSortableDragStart: function(table, handle) {
+
+        var $tr = $(handle).parents('tr');
+
+        // On désactive les autres groupes.
+        $(table).find('tbody > tr[data-sortable-group-id != ' + $tr.data('sortable-group-id') + ']').addClass('nodrop');
+
+    },
+
+    onSortableDrop: function(table, row, changed) {
+
+        // On déplace les enfants de l'élément.
+        var $tr = $(row);
+        var prevItemChildrenNodes = $(table).find('tbody > tr[data-parents*=" ' + $tr.data('item-id') + '"]');
+        if (prevItemChildrenNodes.length) {
+            $tr.after(prevItemChildrenNodes);
+        }
+
+        // On réactive les groupes.
+        $(table).find('tbody > tr').removeClass('nodrop');
+
+        // On définit le groupe à ordonner.
+        var sortableRange = $('tr[data-sortable-group-id = ' + $tr.data('sortable-group-id') + ']'), count = sortableRange.length;
+
+        if (count > 1) {
+
+            var ids = [];
+            var order = [];
+
+            sortableRange.find(this.options.selectors.checkboxes).each(function(i) {
+                ids.push($(this).val());
+                order.push(i);
+            });
+
+            // On construit le tableau de données à envoyer au serveur.
+            var data = {
+                task: 'saveOrder',
+                ids: ids,
+                order: order
+            };
+
+            // On ajoute le jeton.
+            data[this.options.token] = '1';
+
+            $.post(this.options.ajaxURI, data).done(function(data) {
+                console.log('done', data);
+            }).fail(function(data) {
+                console.log('fail', data);
+            }).always(function(data) {
+                console.log('always', data);
+            });
+
+        }
+
     }
 
 };

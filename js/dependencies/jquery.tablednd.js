@@ -535,9 +535,9 @@
             this.dragObject = null;
             // Call the onDrop method if there is one
             config.onDrop
-                && this.originalOrder != this.currentOrder()
-                && $(droppedRow).hide().fadeIn('fast')
-            && config.onDrop(this.currentTable, droppedRow);
+               /* && this.originalOrder != this.currentOrder()
+                && $(droppedRow).hide().fadeIn('fast')*/
+            && config.onDrop(this.currentTable, droppedRow, this.originalOrder != this.currentOrder());
 
             this.currentTable = null; // let go of the table too
         },
