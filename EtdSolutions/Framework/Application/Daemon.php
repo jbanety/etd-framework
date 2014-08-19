@@ -76,7 +76,7 @@ abstract class Daemon extends AbstractDaemonApplication {
         $this->setLogger($logger);
 
         // PID
-        $this->set('application_pid_file', JPATH_BASE . $this->get('application_pid_file'));
+        $this->set('application_pid_file', JPATH_TMP . "/" . $this->get('application_pid_file'));
 
         // On instancie le gestionnaire memcached.
         $this->memcached = new \Memcached($this->get('memcached.persistent_id'));
