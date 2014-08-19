@@ -51,10 +51,10 @@ class Field_Boolean extends Field {
 
         return '<div class="form-control-static"><div class="btn-group' . $class . '" data-toggle="buttons">
   <label class="btn' . $buttonClass . $active1 . '">
-    <input type="radio" name="' . $this->name . '" id="' . $this->id . '1"' . $checked1 . '> ' . Text::_("APP_GLOBAL_YES") . '
+    <input type="radio" name="' . $this->name . '" id="' . $this->id . '1"' . $checked1 . ' value="1"> ' . Text::_("APP_GLOBAL_YES") . '
   </label>
   <label class="btn' . $buttonClass . $active0 . '">
-    <input type="radio" name="' . $this->name . '" id="' . $this->id . '0"' . $checked0 . '> ' . Text::_("APP_GLOBAL_NO") . '
+    <input type="radio" name="' . $this->name . '" id="' . $this->id . '0"' . $checked0 . ' value="0"> ' . Text::_("APP_GLOBAL_NO") . '
   </label>
 </div></div>';
 
