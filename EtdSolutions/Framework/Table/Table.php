@@ -20,7 +20,7 @@ defined('_JEXEC') or die;
 
 /**
  * Représentation d'une table dans la base de données.
-*/
+ */
 abstract class Table extends DataObject {
 
     /**
@@ -317,8 +317,7 @@ abstract class Table extends DataObject {
             $pk = $this->getProperty($this->pk);
         }
 
-        $db = Web::getInstance()
-                 ->getDb();
+        $db = $this->getDb();
 
         // On supprime la ligne.
         $query = $db->getQuery(true)
@@ -328,6 +327,58 @@ abstract class Table extends DataObject {
         $db->setQuery($query);
 
         $db->execute();
+
+        $this->clearErrors();
+
+        return true;
+    }
+
+    /**
+     * Méthode pour définir l'état de publication d'une ligne ou d'une liste de lignes.
+     *
+     * @param   mixed $pks        Un tableau optionnel des clés primaires à modifier.
+     *                            Si non définit, on prend la valeur de l'instance.
+     * @param   int   $state      L'état de publication. eg. [0 = dépublié, 1 = publié]
+     *
+     * @return  bool  True en cas de succès, false sinon.
+     */
+    public function publish($pks = null, $state = 1) {
+
+        // On initialise les variables.
+        $pks    = (array)$pks;
+        $state  = (int)$state;
+        $fields = $this->getFields();
+        $field  = null;
+
+        // On détermine le bon champ.
+        if (in_array('published', $fields)) {
+            $field = 'published';
+        } elseif (in_array('state', $fields)) {
+            $field = 'state';
+        } else {
+            $this->addError(Text::_('APP_ERROR_TABLE_NO_PUBLISHED_FIELD'));
+
+            return false;
+        }
+
+        // S'il n'y a pas de clés primaires de défini on regarde si on en a une dans l'instance.
+        if (empty($pks)) {
+            $pks = array($this->getProperty($this->getPk()));
+        }
+
+        $db = $this->getDb();
+
+        $db->setQuery($db->getQuery(true)
+                         ->update($this->getTable())
+                         ->set($field . " = " . $state)
+                         ->where($this->getPk() . " IN (" . implode(",", $pks) . ")"));
+
+        // On met à jour l'instance si besoin.
+        if (in_array($this->getProperty($this->getPk()), $pks)) {
+            $this->setProperty($field, $state);
+        }
+
+        $this->clearErrors();
 
         return true;
     }
@@ -403,7 +454,8 @@ abstract class Table extends DataObject {
      */
     protected function lock() {
 
-        $this->getDb()->lockTable($this->getTable());
+        $this->getDb()
+             ->lockTable($this->getTable());
         $this->locked = true;
 
         return true;
@@ -418,7 +470,8 @@ abstract class Table extends DataObject {
      */
     protected function unlock() {
 
-        $this->getDb()->unlockTables();
+        $this->getDb()
+             ->unlockTables();
         $this->locked = false;
 
         return true;

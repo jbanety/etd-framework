@@ -76,6 +76,20 @@ class ItemController extends Controller {
         }
 
         parent::__construct($input, $app);
+
+        // On enregistre les tâches standards.
+
+        // Valeur = 0
+        $this->registerTask('unpublish', 'publish');
+
+        // Valeur = 2
+        $this->registerTask('archive', 'publish');
+
+        // Valeur = -2
+        $this->registerTask('trash', 'publish');
+
+        // Valeur = -3
+        $this->registerTask('report', 'publish');
     }
 
     /**
@@ -323,7 +337,7 @@ class ItemController extends Controller {
 
         $model = $this->getModel();
         $id    = $this->getInput()
-                      ->get('id', 0, 'array');
+                      ->get('id', array(), 'array');
 
         // Si on a aucun élément, on redirige vers la liste avec une erreur.
         if (!is_array($id) || count($id) < 1) {
@@ -345,6 +359,75 @@ class ItemController extends Controller {
 
             // Une erreur s'est produite.
             $this->redirect("/" . $this->listRoute, $model->getError(), 'error');
+        }
+
+        return true;
+
+    }
+
+    /**
+     * Méthode pour changer l'état d'un élément.
+     *
+     * @return bool
+     */
+    public function publish() {
+
+        // App
+        $app = $this->getApplication();
+
+        // On contrôle le jeton de la requête.
+        if (!$app->checkToken()) {
+            $app->raiseError(Text::_('APP_ERROR_INVALID_TOKEN', 403));
+        }
+
+        $model = $this->getModel();
+        $id    = $this->getInput()
+                      ->get('id', array(), 'array');
+
+        // Si on a aucun élément, on redirige vers la liste avec une erreur.
+        if (!is_array($id) || count($id) < 1) {
+            $this->redirect("/" . $this->listRoute, Text::_('CTRL_' . strtoupper($this->getName()) . '_NO_ITEM_SELECTED'), 'warning');
+
+            return false;
+        }
+
+        // On s'assure que ce sont bien des integers.
+        $id = ArrayHelper::toInteger($id);
+
+        // On prend la bonne valeur en fonction de la tâche.
+        $data  = array(
+            'publish'   => 1,
+            'unpublish' => 0,
+            'archive'   => 2,
+            'trash'     => -2,
+            'report'    => -3
+        );
+        $value = ArrayHelper::getValue($data, $this->task, 0, 'int');
+
+        // On effectue l'action.
+        if ($model->publish($id, $value)) {
+
+            // La tâche s'est faite avec succès.
+
+            $ntext = 'CTRL_' . strtoupper($this->getName());
+            if ($value == 1) {
+                $ntext .= '_N_ITEMS_PUBLISHED';
+            } elseif ($value == 0) {
+                $ntext .= '_N_ITEMS_UNPUBLISHED';
+            } elseif ($value == 2) {
+                $ntext .= '_N_ITEMS_ARCHIVED';
+            } else {
+                $ntext .= '_N_ITEMS_TRASHED';
+            }
+
+            $this->redirect("/" . $this->listRoute, Text::plural($ntext, count($id)), 'success');
+
+        } else {
+
+            // Une erreur s'est produite.
+            $this->redirect("/" . $this->listRoute, $model->getError(), 'error');
+
+            return false;
         }
 
         return true;
@@ -469,12 +552,15 @@ class ItemController extends Controller {
      * Méthode pour récupérer le table associé au controller.
      *
      * @param string $name Le nom du table.
+     *
      * @return Table
      */
     protected function getTable($name = null) {
+
         if (!isset($name)) {
             $name = $this->getName();
         }
+
         return Table::getInstance($name);
     }
 

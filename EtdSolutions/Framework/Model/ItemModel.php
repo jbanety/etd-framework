@@ -395,6 +395,61 @@ abstract class ItemModel extends Model {
     }
 
     /**
+     * Méthode pour changer l'état d'un enregistrement.
+     *
+     * @param $pks   array Un tableau des clés primaires représentantes des enregistrements à modifier.
+     * @param $value int   La valeur de l'état de publication.
+     *
+     * @return bool
+     */
+    public function publish(&$pks, $value = 0) {
+
+        // On s'assure d'avoir un tableau.
+        $pks = (array)$pks;
+
+        // On récupère le table.
+        $table = $this->getTable();
+
+        // On parcourt tous les éléments.
+        foreach ($pks as $i => $pk) {
+
+            // On teste si l'utilisateur peut modifier cet enregistrement.
+            if ($this->allowEdit($pk)) {
+
+                // On tente de charger la ligne.
+                if ($table->load($pk) === false) {
+                    $this->setError($table->getError());
+
+                    return false;
+                }
+
+                // On tente de changer l'état de l'enregistrement.
+                if (!$table->publish($pks, $value)) {
+                    $this->setError($table->getError());
+
+                    return false;
+                }
+
+            } else {
+
+                // On retire la clé primaire fautive.
+                unset($pks[$i]);
+
+                // On retourne une erreur.
+                $this->setError(Text::_('CTRL_LIST_ERROR_DUPLICATE_NOT_PERMITTED'));
+
+                return false;
+            }
+        }
+
+        // On nettoie le cache.
+        $this->cleanCache();
+
+        return true;
+
+    }
+
+    /**
      * Méthode pour nettoyer le cache.
      *
      * @param null $id Un identifiant de cache optionnel.
