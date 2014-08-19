@@ -257,14 +257,6 @@ abstract class Controller extends AbstractController {
     }
 
     /**
-     * @return Web
-     */
-    public function getApplication() {
-
-        return parent::getApplication();
-    }
-
-    /**
      * Méthode pour récupérer le nom du controller.
      *
      * @return  string  Le nom du controller.
