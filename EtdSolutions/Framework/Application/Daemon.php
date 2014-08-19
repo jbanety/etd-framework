@@ -47,7 +47,7 @@ abstract class Daemon extends AbstractDaemonApplication {
     /**
      * Constructeur
      *
-     * @param Cli $input
+     * @param Cli      $input
      * @param Registry $config
      */
     public function __construct(Cli $input = null, Registry $config = null) {
@@ -89,7 +89,7 @@ abstract class Daemon extends AbstractDaemonApplication {
     /**
      * Méthode pour récupérer une instance d'une application, la créant si besoin.
      *
-     * @param   string $name            Le nom de l'application
+     * @param   string $name Le nom de l'application
      *
      * @return  Daemon  L'instance.
      *
@@ -97,14 +97,16 @@ abstract class Daemon extends AbstractDaemonApplication {
      */
     public static function getInstance($name) {
 
-        $name = ucfirst($name);
+        $name  = ucfirst($name);
         $store = md5($name);
 
         if (empty(self::$instance[$store])) {
 
+            $conf = new \JConfig;
+
             // On définit la liste des espaces de noms dans laquelle le modèle peut se trouver.
             $namespaces = array(
-                self::get('app_namespace'),
+                $conf->app_namespace,
                 '\\EtdSolutions\\Framework'
             );
 
@@ -128,7 +130,6 @@ abstract class Daemon extends AbstractDaemonApplication {
 
             self::$instance[$store] = new $className;
         }
-
 
         return self::$instance[$store];
     }
@@ -197,6 +198,7 @@ abstract class Daemon extends AbstractDaemonApplication {
      * @see     posix_setuid()
      */
     protected function changeIdentity() {
+
         // Get the group and user ids to set for the daemon.
         $uid = (int)$this->config->get('app_uid', 0);
         $gid = (int)$this->config->get('app_gid', 0);
@@ -206,14 +208,16 @@ abstract class Daemon extends AbstractDaemonApplication {
 
         // Change the user id for the process id file if necessary.
         if ($uid && (fileowner($file) != $uid) && (!@ chown($file, $uid))) {
-            $this->getLogger()->error(Text::_('APP_DAEMON_ERROR_ID_FILE_USER_OWNERSHIP'));
+            $this->getLogger()
+                 ->error(Text::_('APP_DAEMON_ERROR_ID_FILE_USER_OWNERSHIP'));
 
             return false;
         }
 
         // Change the group id for the process id file if necessary.
         if ($gid && (filegroup($file) != $gid) && (!@ chgrp($file, $gid))) {
-            $this->getLogger()->error(Text::_('APP_DAEMON_ERROR_ID_FILE_GROUP_OWNERSHIP'));
+            $this->getLogger()
+                 ->error(Text::_('APP_DAEMON_ERROR_ID_FILE_GROUP_OWNERSHIP'));
 
             return false;
         }
@@ -225,22 +229,26 @@ abstract class Daemon extends AbstractDaemonApplication {
 
         // Change the group id for the process necessary.
         if ($gid && (posix_getgid() != $gid) && (!@ posix_setgid($gid))) {
-            $this->getLogger()->error(Text::_('APP_DAEMON_ERROR_ID_PROCESS_GROUP_OWNERSHIP'));
+            $this->getLogger()
+                 ->error(Text::_('APP_DAEMON_ERROR_ID_PROCESS_GROUP_OWNERSHIP'));
+
             return false;
         }
 
         // Change the user id for the process necessary.
         if ($uid && (posix_getuid() != $uid) && (!@ posix_setuid($uid))) {
-            $this->getLogger()->error(Text::_('APP_DAEMON_ERROR_ID_PROCESS_USER_OWNERSHIP'));
+            $this->getLogger()
+                 ->error(Text::_('APP_DAEMON_ERROR_ID_PROCESS_USER_OWNERSHIP'));
+
             return false;
         }
 
-
         // Get the user and group information based on uid and gid.
-        $user = posix_getpwuid($uid);
+        $user  = posix_getpwuid($uid);
         $group = posix_getgrgid($gid);
 
-        $this->getLogger()->info(Text::sprintf('APP_DAEMON_ID_SUCCESS', $user['name'], $group['name']));
+        $this->getLogger()
+             ->info(Text::sprintf('APP_DAEMON_ID_SUCCESS', $user['name'], $group['name']));
 
         return true;
     }
@@ -248,14 +256,15 @@ abstract class Daemon extends AbstractDaemonApplication {
     /**
      * Méthode pour éteindre le daemon et optionnellement le redémarrer.
      *
-     * @param   boolean  $restart  True pour redémarrer le daemon en sortie.
+     * @param   boolean $restart True pour redémarrer le daemon en sortie.
      *
      * @return  void
      */
     protected function shutdown($restart = false) {
 
         if (isset($this->db)) {
-            $this->getDb()->disconnect();
+            $this->getDb()
+                 ->disconnect();
         }
 
         if (isset($this->memcached)) {
@@ -265,6 +274,5 @@ abstract class Daemon extends AbstractDaemonApplication {
         parent::shutdown($restart);
 
     }
-
 
 }
