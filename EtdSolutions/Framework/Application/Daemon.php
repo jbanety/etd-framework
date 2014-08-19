@@ -35,11 +35,6 @@ abstract class Daemon extends AbstractDaemonApplication {
     protected $db;
 
     /**
-     * @var \Memcached Gestionnaire memcached.
-     */
-    protected $memcached;
-
-    /**
      * @var Language La langue de l'application.
      */
     protected $language;
@@ -71,18 +66,12 @@ abstract class Daemon extends AbstractDaemonApplication {
         $this->getLanguage();
 
         // On instancie le logger.
-        $logger = new Logger($this->get('app_name'));
-        $logger->pushHandler(new StreamHandler(JPATH_LOGS, Logger::INFO));
+        $logger = new Logger($this->get('application_name'));
+        $logger->pushHandler(new StreamHandler(JPATH_LOGS . "/" . $this->get('application_logfile'), Logger::INFO));
         $this->setLogger($logger);
 
         // PID
-        $this->set('app_pid_file', JPATH_TMP . "/" . $this->get('app_pid_file'));
-
-        // On instancie le gestionnaire memcached.
-        $this->memcached = new \Memcached($this->get('memcached.persistent_id'));
-
-        // On ajoute le serveur.
-        $this->memcached->addServer($this->get('memcached.host'), $this->get('memcached.port'));
+        $this->set('application_pid_file', JPATH_TMP . "/" . $this->get('application_pid_file'));
 
     }
 
@@ -106,7 +95,7 @@ abstract class Daemon extends AbstractDaemonApplication {
 
             // On définit la liste des espaces de noms dans laquelle le modèle peut se trouver.
             $namespaces = array(
-                $conf->app_namespace,
+                $conf->application_namespace,
                 '\\EtdSolutions\\Framework'
             );
 
@@ -200,11 +189,11 @@ abstract class Daemon extends AbstractDaemonApplication {
     protected function changeIdentity() {
 
         // Get the group and user ids to set for the daemon.
-        $uid = (int)$this->config->get('app_uid', 0);
-        $gid = (int)$this->config->get('app_gid', 0);
+        $uid = (int)$this->config->get('application_uid', 0);
+        $gid = (int)$this->config->get('application_gid', 0);
 
         // Get the application process id file path.
-        $file = $this->config->get('app_pid_file');
+        $file = $this->config->get('application_pid_file');
 
         // Change the user id for the process id file if necessary.
         if ($uid && (fileowner($file) != $uid) && (!@ chown($file, $uid))) {
@@ -265,10 +254,6 @@ abstract class Daemon extends AbstractDaemonApplication {
         if (isset($this->db)) {
             $this->getDb()
                  ->disconnect();
-        }
-
-        if (isset($this->memcached)) {
-            $this->memcached->quit();
         }
 
         parent::shutdown($restart);
