@@ -18,7 +18,6 @@ use Joomla\Database\DatabaseFactory;
 use Joomla\Database\DatabaseDriver;
 use Joomla\Language\Language;
 use Joomla\Language\Text;
-use Joomla\Router\RestRouter;
 use Joomla\Registry\Registry;
 use Joomla\Input\Input;
 use Joomla\Application\Web\WebClient;
@@ -32,7 +31,7 @@ defined('_JEXEC') or die;
 final class Web extends AbstractWebApplication {
 
     /**
-     * @var RestRouter  Le router de l'application.
+     * @var Router  Le router de l'application.
      */
     public $router;
 
