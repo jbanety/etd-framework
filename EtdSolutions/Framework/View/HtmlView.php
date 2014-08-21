@@ -61,13 +61,14 @@ class HtmlView extends AbstractHtmlView {
     /**
      * Méthode pour charger un model.
      *
-     * @param string $name Le nom du modèle. Facultatif.
+     * @param string $name           Le nom du modèle. Facultatif.
+     * @param   bool $ignore_request Utilisé pour ignorer la mise à jour de l'état depuis l'input.
      *
      * @return AbstractModel Le modèle.
      *
      * @throws \RuntimeException
      */
-    protected function getModel($name = null) {
+    protected function getModel($name = null, $ignore_request = false) {
 
         if (!isset($name)) {
             if (isset($this->defaultModel)) {
@@ -79,7 +80,7 @@ class HtmlView extends AbstractHtmlView {
 
         $name = ucfirst($name);
 
-        return Model::getInstance($name);
+        return Model::getInstance($name, $ignore_request);
 
     }
 
