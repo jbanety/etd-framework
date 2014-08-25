@@ -110,8 +110,11 @@ abstract class ItemModel extends Model {
             $name = $this->getName();
         }
 
+        // On met le nom dans les options.
+        $options['name'] = $name;
+
         // On compile un identifiant de cache.
-        $store = md5("getForm:" . $name . ":" . serialize($options));
+        $store = md5("getForm:" . serialize($options));
 
         if (isset($this->cache[$store])) {
             return $this->cache[$store];
