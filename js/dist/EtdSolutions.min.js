@@ -1126,23 +1126,6 @@ EtdSolutions.Framework.Form = {
         return this;
     },
 
-    onSortUpdate: function() {
-
-        this.$form.find(this.options.selectors.taskInput).val('saveOrder');
-        /*f.find('input[name="order[]"]').each(function(index) {
-         $(this).val(index);
-         });
-         var data = f.serializeArray();
-         f.find('input[name="cid[]"]').each(function() {
-         data.push({
-         name: 'cid[]',
-         value: $(this).val()
-         });
-         });*/
-        //console.log(data);
-        //$.post('/projets/saveOrderAjax', data);
-    },
-
     onSortableDragStart: function(table, handle) {
 
         var $tr = $(handle).parents('tr');
