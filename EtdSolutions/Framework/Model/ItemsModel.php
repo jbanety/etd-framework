@@ -33,12 +33,16 @@ abstract class ItemsModel extends Model {
     protected $filter_fields = array();
 
     /**
-     * @var array Cache interne des données.
+     * Cache interne des données.
+     *
+     * @var array
      */
     protected $cache = array();
 
     /**
-     * @var DatabaseQuery Un cache interne pour la dernière requête utilisée.
+     * Un cache interne pour la dernière requête utilisée.
+     *
+     * @var DatabaseQuery
      */
     protected $query;
 
@@ -48,6 +52,15 @@ abstract class ItemsModel extends Model {
      * @var    string
      */
     protected $context = null;
+
+    /**
+     * Nom de la colonne avec laquelle on indexe le listing.
+     *
+     * @var string
+     *
+     * @see ItemsModel::getItems
+     */
+    protected $indexBy = '';
 
     /**
      * Instancie le modèle.
@@ -84,7 +97,7 @@ abstract class ItemsModel extends Model {
         $query = $this->_getListQuery();
 
         $this->db->setQuery($query, $this->getStart(), $this->get('list.limit'));
-        $items = $this->db->loadObjectList();
+        $items = $this->db->loadObjectList($this->indexBy);
 
         // Add the items to the internal cache.
         $this->cache[$store] = $items;
