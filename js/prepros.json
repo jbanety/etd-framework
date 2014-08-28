@@ -1,17 +1,17 @@
 {
-  "id": "3ce6aee5",
+  "id": "b0fefbdf",
   "cfgVersion": 1,
   "name": "Framework JS",
   "files": {
     "29997775": {
       "id": "29997775",
-      "pid": "3ce6aee5",
+      "pid": "b0fefbdf",
       "name": "jquery.sortable.js",
       "input": "dependencies/jquery.sortable.js",
       "customOutput": false,
       "type": "Js",
       "config": {
-        "autoCompile": true,
+        "autoCompile": false,
         "uglify": true,
         "mangle": true,
         "sourcemaps": false
@@ -19,7 +19,7 @@
     },
     "0fd04f3c": {
       "id": "0fd04f3c",
-      "pid": "3ce6aee5",
+      "pid": "b0fefbdf",
       "name": "EtdSolutions.js",
       "input": "dist/EtdSolutions.js",
       "customOutput": "dist/EtdSolutions.min.js",
@@ -33,7 +33,7 @@
     },
     "c699366e": {
       "id": "c699366e",
-      "pid": "3ce6aee5",
+      "pid": "b0fefbdf",
       "name": "build.js",
       "input": "src/build.js",
       "customOutput": "dist/EtdSolutions.js",
@@ -49,7 +49,7 @@
   "imports": {
     "54895686": {
       "id": "54895686",
-      "pid": "3ce6aee5",
+      "pid": "b0fefbdf",
       "path": "dependencies/jquery.tablednd.js",
       "parents": [
         "c699366e"
@@ -57,7 +57,7 @@
     },
     "60e4d8ba": {
       "id": "60e4d8ba",
-      "pid": "3ce6aee5",
+      "pid": "b0fefbdf",
       "path": "dependencies/sprintf.js",
       "parents": [
         "c699366e"
@@ -65,7 +65,7 @@
     },
     "e50cc2a0": {
       "id": "e50cc2a0",
-      "pid": "3ce6aee5",
+      "pid": "b0fefbdf",
       "path": "src/EtdSolutions/EtdSolutions.js",
       "parents": [
         "c699366e"
@@ -73,7 +73,7 @@
     },
     "c3d8561b": {
       "id": "c3d8561b",
-      "pid": "3ce6aee5",
+      "pid": "b0fefbdf",
       "path": "src/EtdSolutions/Framework/Framework.js",
       "parents": [
         "c699366e"
@@ -81,7 +81,7 @@
     },
     "ef191a74": {
       "id": "ef191a74",
-      "pid": "3ce6aee5",
+      "pid": "b0fefbdf",
       "path": "src/EtdSolutions/Framework/Form/Form.js",
       "parents": [
         "c699366e"
@@ -89,7 +89,7 @@
     },
     "f6ab0b76": {
       "id": "f6ab0b76",
-      "pid": "3ce6aee5",
+      "pid": "b0fefbdf",
       "path": "src/EtdSolutions/Framework/Language/Language.js",
       "parents": [
         "c699366e"
@@ -97,7 +97,7 @@
     },
     "f232a141": {
       "id": "f232a141",
-      "pid": "3ce6aee5",
+      "pid": "b0fefbdf",
       "path": "src/EtdSolutions/Framework/Language/Text.js",
       "parents": [
         "c699366e"
