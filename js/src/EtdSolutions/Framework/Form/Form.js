@@ -10,6 +10,8 @@
 EtdSolutions.Framework.Form = {
 
     $form: null,
+    $filtersContainer: null,
+    $filtersInputs: null,
 
     options: {
         ajaxURI: null,
@@ -27,7 +29,8 @@ EtdSolutions.Framework.Form = {
             orderingInput: 'input[name="list_ordering"]',
             directionInput: 'input[name="list_direction"]',
             sortableContainer: 'table',
-            sortableHandle: '.sortable-handle.active'
+            sortableHandle: '.sortable-handle.active',
+            filterInputs: 'select, input[type="checkbox"], input[type="radio"]'
         }
     },
 
@@ -57,6 +60,15 @@ EtdSolutions.Framework.Form = {
         this.$form.find(this.options.selectors.orderingBtn).on('click', $.proxy(this.onOrderingColumnClick, this));
 
         return this;
+    },
+
+    addToolbarFilters: function(filtersContainer) {
+
+        this.$filtersContainer = $(filtersContainer);
+        this.$filtersInputs = this.$filtersContainer.find(this.options.selectors.filterInputs);
+        this.$filtersInputs.on('change', $.proxy(this.onFilterChange, this));
+        return this;
+
     },
 
     makeSortable: function() {
@@ -283,6 +295,23 @@ EtdSolutions.Framework.Form = {
             });
 
         }
+
+    },
+
+    onFilterChange: function(event) {
+
+        // On supprime tous les champs "filters" déjà présents dans le formulaire.
+        this.$form.find('[name^="filter"]').remove();
+
+        // On ajoute les champs au formulaire.
+        this.$filtersInputs.each($.proxy(function(index, element) {
+            var $element = $(element);
+            var $input = $('<input type="hidden" name="' + $element.attr('name') + '" value="' + $element.val() + '">');
+            this.$form.append($input);
+        }, this));
+
+        this.$form.attr('action', '/' + this.options.listView);
+        this.$form.submit();
 
     }
 

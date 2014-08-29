@@ -3,20 +3,6 @@
   "cfgVersion": 1,
   "name": "Framework JS",
   "files": {
-    "29997775": {
-      "id": "29997775",
-      "pid": "b0fefbdf",
-      "name": "jquery.sortable.js",
-      "input": "dependencies/jquery.sortable.js",
-      "customOutput": false,
-      "type": "Js",
-      "config": {
-        "autoCompile": false,
-        "uglify": true,
-        "mangle": true,
-        "sourcemaps": false
-      }
-    },
     "0fd04f3c": {
       "id": "0fd04f3c",
       "pid": "b0fefbdf",
