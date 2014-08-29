@@ -373,6 +373,8 @@ abstract class Table extends DataObject {
                          ->set($field . " = " . $state)
                          ->where($this->getPk() . " IN (" . implode(",", $pks) . ")"));
 
+        $db->execute();
+
         // On met à jour l'instance si besoin.
         if (in_array($this->getProperty($this->getPk()), $pks)) {
             $this->setProperty($field, $state);
