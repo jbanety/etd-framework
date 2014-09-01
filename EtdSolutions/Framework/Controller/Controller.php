@@ -25,24 +25,50 @@ defined('_JEXEC') or die;
  */
 abstract class Controller extends AbstractController {
 
+    /**
+     * @var string Tâche par défaut à exécuter.
+     */
     protected $defaultTask = 'display';
 
+    /**
+     * @var string Layout par défaut pour la vue.
+     */
     protected $defaultLayout = 'default';
 
+    /**
+     * @var string Vue par défaut à charger.
+     */
     protected $defaultView;
-
-    protected $name;
-
-    protected $task;
-
-    protected $doTask;
-
-    protected $tasks;
 
     /**
      * @var $defaultModel string Le nom du model par défaut.
      */
     protected $defaultModel;
+
+    /**
+     * @var string Nom du controller.
+     */
+    protected $name;
+
+    /**
+     * @var string Tâche à exécuter par le controller.
+     */
+    protected $task;
+
+    /**
+     * @var string Tâche en cours d'exécution.
+     */
+    protected $doTask;
+
+    /**
+     * @var array Tableau contenant un mapping entre les tâches et les fonctions.
+     */
+    protected $tasks;
+
+    /**
+     * @var string  Nom du layout utilisé pour la vue.
+     */
+    protected $layout;
 
     /**
      * Instancie le controller.
@@ -182,11 +208,8 @@ abstract class Controller extends AbstractController {
         // On instancie la vue.
         $view = new $className();
 
-        // On définit la valeur par défaut pour le layout si aucun n'est spécifié.
-        $app->input->def('layout', $this->defaultLayout);
-
         // On affecte le layout à la vue.
-        $view->setLayout($app->input->get('layout'));
+        $view->setLayout($this->getLayout());
 
         try {
             $result = $view->render();
@@ -275,6 +298,32 @@ abstract class Controller extends AbstractController {
         }
 
         return $this->name;
+    }
+
+    /**
+     * Méthode pour définir le layout.
+     *
+     * @param string $layout Le layout.
+     */
+    public function setLayout($layout) {
+        $this->layout = $layout;
+    }
+
+    /**
+     * Méthode qui retourne le layout.
+     *
+     * @return string Le layout.
+     */
+    public function getLayout() {
+
+        if (empty($this->layout)) {
+
+            // On définit la valeur par défaut pour le layout si aucun n'est spécifié.
+            $this->layout = $this->defaultLayout;
+
+        }
+
+        return $this->layout;
     }
 
     /**
