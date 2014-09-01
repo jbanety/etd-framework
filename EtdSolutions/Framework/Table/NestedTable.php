@@ -53,13 +53,14 @@ abstract class NestedTable extends Table {
     /**
      * Méthode pour récupérer un noeud et tous ses enfants.
      *
-     * @param   int $pk La clé primaire du noeud pour lequel récupérer l'arbre.
+     * @param   int    $pk    La clé primaire du noeud pour lequel récupérer l'arbre.
+     * @param   string $where La clause WHERE à utiliser pour limiter la sélection de ligne.
      *
      * @return  array|bool Un tableau des noeuds en cas de succès, false sinon.
      *
      * @throws  \RuntimeException en cas d'erreur db.
      */
-    public function getTree($pk = null) {
+    public function getTree($pk = null, $where = null) {
 
         $k  = $this->getPk();
         $pk = (is_null($pk)) ? $this->getProperty($k) : $pk;
@@ -72,6 +73,10 @@ abstract class NestedTable extends Table {
                     ->where('n.lft BETWEEN p.lft AND p.rgt')
                     ->where('p.' . $k . ' = ' . (int)$pk)
                     ->order('n.lft');
+
+        if ($where) {
+            $query->where($where);
+        }
 
         return $db->setQuery($query)
                   ->loadObjectList();
@@ -163,7 +168,7 @@ abstract class NestedTable extends Table {
         $referenceId = $db->loadResult();
 
         if ($referenceId) {
-            return $this->moveByReference($referenceId, $position, $pk);
+            return $this->moveByReference($referenceId, $position, $pk, $where);
         } else {
             return false;
         }
@@ -175,12 +180,13 @@ abstract class NestedTable extends Table {
      * @param   integer $referenceId La clé primaire du noeud de référence.
      * @param   string  $position    Le type d'emplacement. ['before', 'after', 'first-child', 'last-child']
      * @param   integer $pk          La clé primaire du noeud à déplacer.
+     * @param   string  $where       La clause WHERE à utiliser pour limiter la sélection de ligne.
      *
      * @return  boolean  True en cas de succès.
      *
      * @throws  \RuntimeException en cas d'erreur db.
      */
-    public function moveByReference($referenceId, $position = 'after', $pk = null) {
+    public function moveByReference($referenceId, $position = 'after', $pk = null, $where = null) {
 
         $k  = $this->getPk();
         $pk = (is_null($pk)) ? $this->getProperty($k) : $pk;
@@ -196,6 +202,10 @@ abstract class NestedTable extends Table {
                     ->select($k)
                     ->from($this->getTable())
                     ->where('lft BETWEEN ' . (int)$node->lft . ' AND ' . (int)$node->rgt);
+
+        if ($where) {
+            $query->where($where);
+        }
 
         $children = $db->setQuery($query)
                        ->loadColumn();
@@ -221,6 +231,10 @@ abstract class NestedTable extends Table {
               ->set('lft = lft * (-1), rgt = rgt * (-1)')
               ->where('lft BETWEEN ' . (int)$node->lft . ' AND ' . (int)$node->rgt);
 
+        if ($where) {
+            $query->where($where);
+        }
+
         $db->setQuery($query)
            ->execute();
 
@@ -233,6 +247,10 @@ abstract class NestedTable extends Table {
               ->set('lft = lft - ' . (int)$node->width)
               ->where('lft > ' . (int)$node->rgt);
 
+        if ($where) {
+            $query->where($where);
+        }
+
         $db->setQuery($query)
            ->execute();
 
@@ -241,6 +259,10 @@ abstract class NestedTable extends Table {
               ->update($this->getTable())
               ->set('rgt = rgt - ' . (int)$node->width)
               ->where('rgt > ' . (int)$node->rgt);
+
+        if ($where) {
+            $query->where($where);
+        }
 
         $db->setQuery($query)
            ->execute();
@@ -270,6 +292,11 @@ abstract class NestedTable extends Table {
                   ->from($this->getTable())
                   ->where('parent_id = 0')
                   ->order('lft DESC');
+
+            if ($where) {
+                $query->where($where);
+            }
+
             $db->setQuery($query, 0, 1);
             $reference = $db->loadObject();
 
@@ -291,6 +318,10 @@ abstract class NestedTable extends Table {
               ->set('lft = lft + ' . (int)$node->width)
               ->where($repositionData->left_where);
 
+        if ($where) {
+            $query->where($where);
+        }
+
         $db->setQuery($query)
            ->execute();
 
@@ -299,6 +330,10 @@ abstract class NestedTable extends Table {
               ->update($this->getTable())
               ->set('rgt = rgt + ' . (int)$node->width)
               ->where($repositionData->right_where);
+
+        if ($where) {
+            $query->where($where);
+        }
 
         $db->setQuery($query)
            ->execute();
@@ -316,6 +351,10 @@ abstract class NestedTable extends Table {
               ->set('lft = ' . (int)$offset . ' - lft')
               ->set('level = level + ' . (int)$levelOffset)
               ->where('lft < 0');
+
+        if ($where) {
+            $query->where($where);
+        }
 
         $db->setQuery($query)
            ->execute();
@@ -339,6 +378,10 @@ abstract class NestedTable extends Table {
             $query->set('parent_id = ' . (int)$repositionData->new_parent_id)
                   ->where($this->getPk() . ' = ' . (int)$node->$k);
 
+            if ($where) {
+                $query->where($where);
+            }
+
             $db->setQuery($query)
                ->execute();
         }
@@ -359,10 +402,11 @@ abstract class NestedTable extends Table {
      *
      * @param   integer $pk       La clé primaire du noeud à supprimer.
      * @param   boolean $children True pour supprimer ses enfants, false pour déplacer d'un niveau au dessus.
+     * @param   string  $where    La clause WHERE à utiliser pour limiter la sélection de ligne.
      *
      * @return  boolean  True en cas de succès.
      */
-    public function delete($pk = null, $children = true) {
+    public function delete($pk = null, $children = true, $where = null) {
 
         $k  = $this->getPk();
         $pk = (is_null($pk)) ? $this->getProperty($k) : $pk;
@@ -387,6 +431,11 @@ abstract class NestedTable extends Table {
             $query->clear()
                   ->delete($this->getTable())
                   ->where('lft BETWEEN ' . (int)$node->lft . ' AND ' . (int)$node->rgt);
+
+            if ($where) {
+                $query->where($where);
+            }
+
             $db->setQuery($query)
                ->execute();
 
@@ -395,6 +444,11 @@ abstract class NestedTable extends Table {
                   ->update($this->getTable())
                   ->set('lft = lft - ' . (int)$node->width)
                   ->where('lft > ' . (int)$node->rgt);
+
+            if ($where) {
+                $query->where($where);
+            }
+
             $db->setQuery($query)
                ->execute();
 
@@ -403,6 +457,11 @@ abstract class NestedTable extends Table {
                   ->update($this->getTable())
                   ->set('rgt = rgt - ' . (int)$node->width)
                   ->where('rgt > ' . (int)$node->rgt);
+
+            if ($where) {
+                $query->where($where);
+            }
+
             $db->setQuery($query)
                ->execute();
 
@@ -413,6 +472,11 @@ abstract class NestedTable extends Table {
             $query->clear()
                   ->delete($this->getTable())
                   ->where('lft = ' . (int)$node->lft);
+
+            if ($where) {
+                $query->where($where);
+            }
+
             $db->setQuery($query)
                ->execute();
 
@@ -423,6 +487,11 @@ abstract class NestedTable extends Table {
                   ->set('rgt = rgt - 1')
                   ->set('level = level - 1')
                   ->where('lft BETWEEN ' . (int)$node->lft . ' AND ' . (int)$node->rgt);
+
+            if ($where) {
+                $query->where($where);
+            }
+
             $db->setQuery($query)
                ->execute();
 
@@ -438,6 +507,11 @@ abstract class NestedTable extends Table {
                   ->update($this->getTable())
                   ->set('lft = lft - 2')
                   ->where('lft > ' . (int)$node->rgt);
+
+            if ($where) {
+                $query->where($where);
+            }
+
             $db->setQuery($query)
                ->execute();
 
@@ -445,6 +519,11 @@ abstract class NestedTable extends Table {
                   ->update($this->getTable())
                   ->set('rgt = rgt - 2')
                   ->where('rgt > ' . (int)$node->rgt);
+
+            if ($where) {
+                $query->where($where);
+            }
+
             $db->setQuery($query)
                ->execute();
         }
@@ -494,13 +573,14 @@ abstract class NestedTable extends Table {
      * Méthode pour stocker le noeud dans la base de données.
      *
      * @param   boolean $updateNulls True pour mettre à jour les valeurs nulles aussi.
+     * @param   string  $where       La clause WHERE à utiliser pour limiter la sélection de ligne.
      *
      * @return  boolean  True en cas de succès.
      *
      * @throws \UnexpectedValueException
      *
      */
-    public function store($updateNulls = false) {
+    public function store($updateNulls = false, $where = null) {
 
         $k = $this->getPk();
 
@@ -532,6 +612,11 @@ abstract class NestedTable extends Table {
                                   ->from($this->getTable())
                                   ->where('parent_id = 0')
                                   ->order('lft DESC');
+
+                    if ($where) {
+                        $query->where($where);
+                    }
+
                     $this->getDb()
                          ->setQuery($query, 0, 1);
                     $reference = $this->getDb()
@@ -559,6 +644,11 @@ abstract class NestedTable extends Table {
                               ->update($this->getTable())
                               ->set('lft = lft + 2')
                               ->where($repositionData->left_where);
+
+                if ($where) {
+                    $query->where($where);
+                }
+
                 $this->getDb()
                      ->setQuery($query)
                      ->execute();
@@ -568,6 +658,11 @@ abstract class NestedTable extends Table {
                       ->update($this->getTable())
                       ->set('rgt = rgt + 2')
                       ->where($repositionData->right_where);
+
+                if ($where) {
+                    $query->where($where);
+                }
+
                 $this->getDb()
                      ->setQuery($query)
                      ->execute();
@@ -585,7 +680,7 @@ abstract class NestedTable extends Table {
 
             // Si le positionnement a été définit, on déplace le noeud vers sa nouvelle position.
             if ($this->_location_id > 0) {
-                if (!$this->moveByReference($this->_location_id, $this->_location, $this->$k)) {
+                if (!$this->moveByReference($this->_location_id, $this->_location, $this->$k, $where)) {
                     return false;
                 }
             }
@@ -612,12 +707,13 @@ abstract class NestedTable extends Table {
      * @param   mixed   $pks      Un tableau optionnel de clés primaires à mettre à jour. Si non
      *                            définie, la valeur de l'instance est utilisée.
      * @param   integer $state    L'état de publication. eg. [0 = dépublié, 1 = publié]
+     * @param   string  $where    La clause WHERE à utiliser pour limiter la sélection de ligne.
      *
      * @return  boolean  True en cas de succès.
      *
      * @throws \UnexpectedValueException
      */
-    public function publish($pks = null, $state = 1) {
+    public function publish($pks = null, $state = 1, $where = null) {
 
         $k     = $this->getPk();
         $query = $this->getDb()
@@ -663,6 +759,10 @@ abstract class NestedTable extends Table {
                       ->where('n.parent_id > 0')
                       ->where('n.published < ' . (int)$compareState);
 
+                if ($where) {
+                    $query->where($where);
+                }
+
                 // On récupère juste une ligne (c'est déjà une de trop !).
                 $this->getDb()
                      ->setQuery($query, 0, 1);
@@ -681,6 +781,11 @@ abstract class NestedTable extends Table {
                                 ->quoteName($this->getTable()))
                   ->set('published = ' . (int)$state)
                   ->where('(lft > ' . (int)$node->lft . ' AND rgt < ' . (int)$node->rgt . ') OR ' . $k . ' = ' . (int)$pk);
+
+            if ($where) {
+                $query->where($where);
+            }
+
             $this->getDb()
                  ->setQuery($query)
                  ->execute();
@@ -699,13 +804,14 @@ abstract class NestedTable extends Table {
     /**
      * Méthode pour déplacer un noeud d'une place vers la gauche au même niveau.
      *
-     * @param   integer $pk Les clés primaires à déplacer.
+     * @param   integer $pk    Les clés primaires à déplacer.
+     * @param   string  $where La clause WHERE à utiliser pour limiter la sélection de ligne.
      *
      * @return  boolean  True en cas de succès.
      *
      * @throws  \RuntimeException en cas d'erreur db.
      */
-    public function orderUp($pk) {
+    public function orderUp($pk, $where = null) {
 
         $k  = $this->getPk();
         $pk = (is_null($pk)) ? $this->getProperty($k) : $pk;
@@ -722,7 +828,7 @@ abstract class NestedTable extends Table {
             return false;
         }
 
-        $sibling = $this->getNode($node->lft - 1, 'right');
+        $sibling = $this->getNode($node->lft - 1, 'right', $where);
 
         if (empty($sibling)) {
             $this->unlock();
@@ -738,6 +844,10 @@ abstract class NestedTable extends Table {
                           ->from($this->getTable())
                           ->where('lft BETWEEN ' . (int)$node->lft . ' AND ' . (int)$node->rgt);
 
+            if ($where) {
+                $query->where($where);
+            }
+
             $children = $this->getDb()
                              ->setQuery($query)
                              ->loadColumn();
@@ -747,6 +857,10 @@ abstract class NestedTable extends Table {
                   ->set('lft = lft - ' . (int)$sibling->width)
                   ->set('rgt = rgt - ' . (int)$sibling->width)
                   ->where('lft BETWEEN ' . (int)$node->lft . ' AND ' . (int)$node->rgt);
+
+            if ($where) {
+                $query->where($where);
+            }
 
             $this->getDb()
                  ->setQuery($query)
@@ -758,6 +872,10 @@ abstract class NestedTable extends Table {
                   ->set('rgt = rgt + ' . (int)$node->width)
                   ->where('lft BETWEEN ' . (int)$sibling->lft . ' AND ' . (int)$sibling->rgt)
                   ->where($this->getPk() . ' NOT IN (' . implode(',', $children) . ')');
+
+            if ($where) {
+                $query->where($where);
+            }
 
             $this->getDb()
                  ->setQuery($query)
@@ -776,13 +894,14 @@ abstract class NestedTable extends Table {
     /**
      * Méthode pour déplacer un noeud d'une place vers la droite au même niveau.
      *
-     * @param   integer $pk Les clés primaires à déplacer.
+     * @param   integer $pk    Les clés primaires à déplacer.
+     * @param   string  $where La clause WHERE à utiliser pour limiter la sélection de ligne.
      *
      * @return  boolean  True en cas de succès.
      *
      * @throws  \RuntimeException en cas d'erreur db.
      */
-    public function orderDown($pk) {
+    public function orderDown($pk, $where = null) {
 
         $k  = $this->getPk();
         $pk = (is_null($pk)) ? $this->getProperty($k) : $pk;
@@ -799,7 +918,7 @@ abstract class NestedTable extends Table {
             return false;
         }
 
-        $sibling = $this->getNode($node->rgt + 1, 'left');
+        $sibling = $this->getNode($node->rgt + 1, 'left', $where);
 
         if (empty($sibling)) {
             $this->unlock();
@@ -815,6 +934,10 @@ abstract class NestedTable extends Table {
                           ->from($this->getTable())
                           ->where('lft BETWEEN ' . (int)$node->lft . ' AND ' . (int)$node->rgt);
 
+            if ($where) {
+                $query->where($where);
+            }
+
             $children = $this->getDb()
                              ->setQuery($query)
                              ->loadColumn();
@@ -824,6 +947,10 @@ abstract class NestedTable extends Table {
                   ->set('lft = lft + ' . (int)$sibling->width)
                   ->set('rgt = rgt + ' . (int)$sibling->width)
                   ->where('lft BETWEEN ' . (int)$node->lft . ' AND ' . (int)$node->rgt);
+
+            if ($where) {
+                $query->where($where);
+            }
 
             $this->getDb()
                  ->setQuery($query)
@@ -835,6 +962,10 @@ abstract class NestedTable extends Table {
                   ->set('rgt = rgt - ' . (int)$node->width)
                   ->where('lft BETWEEN ' . (int)$sibling->lft . ' AND ' . (int)$sibling->rgt)
                   ->where($this->getPk() . ' NOT IN (' . implode(',', $children) . ')');
+
+            if ($where) {
+                $query->where($where);
+            }
 
             $this->getDb()
                  ->setQuery($query)
@@ -853,11 +984,13 @@ abstract class NestedTable extends Table {
     /**
      * Donne l'ID de l'élément racine dans l'arbre.
      *
+     * @param   string $where Une clause WHERE pour trouve le parent dans une sélection de lignes.
+     *
      * @return  mixed  La clé primaire de la ligne racine, false sinon.
      *
      * @throws \UnexpectedValueException
      */
-    public function getRootId() {
+    public function getRootId($where = null) {
 
         // Get the root item.
         $k = $this->getPk();
@@ -868,6 +1001,10 @@ abstract class NestedTable extends Table {
                       ->select($k)
                       ->from($this->getTable())
                       ->where('parent_id = 0');
+
+        if ($where) {
+            $query->where($where);
+        }
 
         $result = $this->getDb()
                        ->setQuery($query)
@@ -882,6 +1019,10 @@ abstract class NestedTable extends Table {
               ->select($k)
               ->from($this->getTable())
               ->where('lft = 0');
+
+        if ($where) {
+            $query->where($where);
+        }
 
         $result = $this->getDb()
                        ->setQuery($query)
@@ -901,6 +1042,10 @@ abstract class NestedTable extends Table {
                   ->where('alias = ' . $this->getDb()
                                             ->quote('root'));
 
+            if ($where) {
+                $query->where($where);
+            }
+
             $result = $this->getDb()
                            ->setQuery($query)
                            ->loadColumn();
@@ -910,7 +1055,7 @@ abstract class NestedTable extends Table {
             }
         }
 
-        throw new \UnexpectedValueException(sprintf('%s::getRootId', get_class($this)));
+        throw new \UnexpectedValueException(sprintf('%s::getRootId(%s)', get_class($this), $where));
 
     }
 
@@ -921,17 +1066,18 @@ abstract class NestedTable extends Table {
      * @param   integer $leftId   L'id de gauche avec lequel reconstuire l'arbre.
      * @param   integer $level    Le niveau à donner aux noeuds courants.
      * @param   string  $path     Le chemin vers les noeuds courants.
+     * @param   string  $where    Une clause WHERE pour réduire les lignes à reconstruire.
      *
      * @return  integer  1 + la valeur de droite de la racine en cas de succès, false en cas d'échec
      *
      * @throws  \RuntimeException en cas d'erreur db.
      */
-    public function rebuild($parentId = null, $leftId = 0, $level = 0, $path = '') {
+    public function rebuild($parentId = null, $leftId = 0, $level = 0, $path = '', $where = null) {
 
         // Si aucun parent n'est donné, on essaye de le trouver.
         if ($parentId === null) {
             // Get the root item.
-            $parentId = $this->getRootId();
+            $parentId = $this->getRootId($where);
 
             if ($parentId === false) {
                 return false;
@@ -946,6 +1092,10 @@ abstract class NestedTable extends Table {
             $query->clear()
                   ->from($this->getTable())
                   ->where('parent_id = %d');
+
+            if ($where) {
+                $query->where($where);
+            }
 
             if (property_exists($this, 'alias')) {
                 $query->select($this->getPk() . ', alias');
@@ -980,9 +1130,9 @@ abstract class NestedTable extends Table {
              * On ajoute l'alias de l'élément au chemin
              */
             if (property_exists($node, 'alias')) {
-                $rightId = $this->rebuild($node->{$this->getPk()}, $rightId, $level + 1, $path . (empty($path) ? '' : '/') . $node->alias);
+                $rightId = $this->rebuild($node->{$this->getPk()}, $rightId, $level + 1, $path . (empty($path) ? '' : '/') . $node->alias, $where);
             } else {
-                $rightId = $this->rebuild($node->{$this->getPk()}, $rightId, $level + 1, '');
+                $rightId = $this->rebuild($node->{$this->getPk()}, $rightId, $level + 1, '', $where);
             }
 
             // Si il y a un problème de mise à jour, on retourne false pour arrêter la récursion.
@@ -999,6 +1149,10 @@ abstract class NestedTable extends Table {
               ->set('rgt = ' . (int)$rightId)
               ->set('level = ' . (int)$level)
               ->where($this->getPk() . ' = ' . (int)$parentId);
+
+        if ($where) {
+            $query->where($where);
+        }
 
         if (property_exists($this, 'path')) {
             $query->set('path = ' . $this->getDb()
@@ -1083,14 +1237,15 @@ abstract class NestedTable extends Table {
     /**
      * Méthode pour mettre à jour l'ordre des lignes.
      *
-     * @param   array $idArray   Les clés primaires des lignes à réordonner.
-     * @param   array $lft_array Les valeurs "lft" des lignes à réordonner.
+     * @param   array  $idArray   Les clés primaires des lignes à réordonner.
+     * @param   array  $lft_array Les valeurs "lft" des lignes à réordonner.
+     * @param   string $where     Une clause WHERE pour sélectionner les lignes à réordonner.
      *
      * @return  integer  1 + la valeur "rgt" de la racine en cas de succès, false sinon.
      *
      * @throws  \Exception en cas d'erreur db.
      */
-    public function saveorder($idArray = null, $lft_array = null) {
+    public function saveorder($idArray = null, $lft_array = null, $where = null) {
 
         $db = $this->getDb();
 
@@ -1104,15 +1259,19 @@ abstract class NestedTable extends Table {
                     // On met à jour les lignes pour changer la valeur lft.
                     $query->clear()
                           ->update($this->getTable())
-                          ->where($this->getPk() . ' = ' . (int)$idArray[$i])
-                          ->set('lft = ' . (int)$lft_array[$i]);
+                          ->set('lft = ' . (int)$lft_array[$i])
+                          ->where($this->getPk() . ' = ' . (int)$idArray[$i]);
+
+                    if ($where) {
+                        $query->where($where);
+                    }
 
                     $db->setQuery($query)
                        ->execute();
 
                 }
 
-                return $this->rebuild();
+                return $this->rebuild(null, 0, 0, '', $where);
             } else {
                 return false;
             }
@@ -1128,12 +1287,13 @@ abstract class NestedTable extends Table {
      * @param   integer $id    La valeur utilisée pour rechercher le noeud.
      * @param   string  $key   Une clé facultative pour rechercher le noeud. (parent | left | right).
      *                         Si omis, la clé primaire du table est utilisée.
+     * @param   string  $where Une clause WHERE pour sélectionner les lignes à réordonner.
      *
      * @return  object|false    Un objet représentant le noeud ou false en cas d'échec.
      *
      * @throws  \RuntimeException en cas d'erreur db.
      */
-    protected function getNode($id, $key = null) {
+    protected function getNode($id, $key = null, $where = null) {
 
         // On détermine sur quelle clé on doit se baser pour récupérer le noeud.
         switch ($key) {
@@ -1161,13 +1321,17 @@ abstract class NestedTable extends Table {
                       ->from($this->getTable())
                       ->where($k . ' = ' . (int)$id);
 
+        if ($where) {
+            $query->where($where);
+        }
+
         $row = $this->getDb()
                     ->setQuery($query, 0, 1)
                     ->loadObject();
 
         // On contrôle la ligne retournée.
         if (empty($row)) {
-            throw new \UnexpectedValueException(sprintf('%s::getNode(%d, %s) failed.', get_class($this), $id, $key));
+            throw new \UnexpectedValueException(sprintf('%s::getNode(%d, %s) failed. SQL: %s.', get_class($this), $id, $key, (string)$query));
         }
 
         // On effectue des calculs.
