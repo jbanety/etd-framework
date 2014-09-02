@@ -68,6 +68,11 @@ class Document {
     protected $positions = array();
 
     /**
+     * @var string Le nom du fichier (sans l'extension) qui sera chargé comme template HTML.
+     */
+    protected $templateFile = 'default';
+
+    /**
      * @var Document L'instance du document.
      */
     private static $instance;
@@ -151,6 +156,29 @@ class Document {
     public function getDescription() {
 
         return $this->description;
+    }
+
+    /**
+     * Définit le fichier PHP qui sera chargé comme template HTML.
+     *
+     * @param string $file Le nom du fichier sans extension.
+     *
+     * @return  Document Cette instance $this pour le chaining.
+     */
+    public function setTemplateFile($file) {
+
+        $this->templateFile = $file;
+
+        return $this;
+    }
+
+    /**
+     * Retourne le nom du fichier (sans extension) du template HTML.
+     *
+     * @return string
+     */
+    public function getTemplateFile() {
+        return $this->templateFile;
     }
 
     /**
@@ -389,7 +417,7 @@ class Document {
 
         $contents = '';
 
-        $file = JPATH_THEME . '/template.php';
+        $file = JPATH_THEME . '/html/templates/' . $this->templateFile . '.php';
 
         // Check to see if we have a valid template file
         if (file_exists($file)) {
