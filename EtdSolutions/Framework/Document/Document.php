@@ -42,10 +42,19 @@ class Document {
      */
     public $stylesheets = array();
 
+    /**
+     * @var array Styles en ligne.
+     */
     public $styles = array();
 
+    /**
+     * @var array Scripts JS en ligne.
+     */
     public $js = array();
 
+    /**
+     * @var array Scripts JS en ligne exécutés dans le contexte jQuery.
+     */
     public $domReadyJs = array();
 
     /**
@@ -53,10 +62,19 @@ class Document {
      */
     protected $template = '';
 
+    /**
+     * @var array Tableau des buffers du rendu des positions.
+     */
     protected $positions = array();
 
+    /**
+     * @var Document L'instance du document.
+     */
     private static $instance;
 
+    /**
+     * Constructeur.
+     */
     function __construct() {
 
         $this->scripts['head'] = array();
@@ -88,11 +106,11 @@ class Document {
     }
 
     /**
-     * Sets the title of the document
+     * Définit le titre du document.
      *
-     * @param   string $title The title to be set
+     * @param   string $title Le titre
      *
-     * @return  Document instance of $this to allow chaining
+     * @return  Document Cette instance $this pour le chaining.
      */
     public function setTitle($title) {
 
@@ -102,7 +120,7 @@ class Document {
     }
 
     /**
-     * Return the title of the document.
+     * Retourne le titre du document.
      *
      * @return  string
      */
@@ -112,11 +130,11 @@ class Document {
     }
 
     /**
-     * Sets the description of the document
+     * Définit la description du document
      *
-     * @param   string $description The description to set
+     * @param   string $description La description
      *
-     * @return  Document instance of $this to allow chaining
+     * @return  Document Cette instance $this pour le chaining.
      */
     public function setDescription($description) {
 
@@ -126,7 +144,7 @@ class Document {
     }
 
     /**
-     * Return the description of the page.
+     * Retourne la description du document.
      *
      * @return  string
      */
@@ -135,6 +153,15 @@ class Document {
         return $this->description;
     }
 
+    /**
+     * Ajoute un fichier JavaScript à charger.
+     *
+     * @param string $url      L'URI du fichier à charger.
+     * @param string $position La position de la ligne dans le document. (head = avant la balise </head>; foot = avant la balise </body>)
+     * @param bool   $onTop    Place la ligne en haut de la pile.
+     *
+     * @return Document Cette instance $this pour le chaining.
+     */
     public function addScript($url, $position = "foot", $onTop = false) {
 
         if (!in_array($url, $this->scripts[$position])) {
@@ -148,6 +175,15 @@ class Document {
         return $this;
     }
 
+    /**
+     * Ajoute du script JavaScript en ligne.
+     *
+     * @param string $script   Le script JS à ajouter.
+     * @param string $position La position du script dans le document. (head = avant la balise </head>; foot = avant la balise </body>)
+     * @param bool   $onTop    Place le script en haut de la pile.
+     *
+     * @return Document Cette instance $this pour le chaining.
+     */
     public function addJS($script, $position = "foot", $onTop = false) {
 
         if (!in_array($script, $this->js[$position])) {
@@ -161,6 +197,15 @@ class Document {
         return $this;
     }
 
+    /**
+     * Ajoute du script JavaScript en ligne exécuté dans le contexte jQuery.
+     * Il sera exécuté après que le DOM du document soit prêt.
+     *
+     * @param string $script Le script JS à ajouter.
+     * @param bool   $onTop  Place le script en haut de la pile.
+     *
+     * @return Document Cette instance $this pour le chaining.
+     */
     public function addDomReadyJS($script, $onTop = false) {
 
         if (!in_array($script, $this->domReadyJs)) {
@@ -174,6 +219,15 @@ class Document {
         return $this;
     }
 
+    /**
+     * Ajoute une feuille de styles à charger.
+     *
+     * @param string $url      L'URI du fichier à charger.
+     * @param string $position La position de la ligne dans le document. (head = avant la balise </head>; foot = avant la balise </body>)
+     * @param bool   $onTop    Place la ligne en haut de la pile.
+     *
+     * @return Document Cette instance $this pour le chaining.
+     */
     public function addStylesheet($url, $position = "head", $onTop = false) {
 
         if (!in_array($url, $this->stylesheets[$position])) {
@@ -187,6 +241,15 @@ class Document {
         return $this;
     }
 
+    /**
+     * Ajoute du CSS en ligne.
+     *
+     * @param string $css      Le CSS à ajouter.
+     * @param string $position La position du CSS dans le document. (head = avant la balise </head>; foot = avant la balise </body>)
+     * @param bool   $onTop    Place le script en haut de la pile.
+     *
+     * @return Document Cette instance $this pour le chaining.
+     */
     public function addCSS($css, $position = "head", $onTop = false) {
 
         if (!in_array($css, $this->styles[$position])) {
@@ -200,6 +263,16 @@ class Document {
         return $this;
     }
 
+    /**
+     * Méthode pour récupérer le contenu rendu pour une position.
+     *
+     * Cette méthode effectue le rendu de la position si celui-ci
+     * n'a pas déjà été fait.
+     *
+     * @param string $position Le nom de la position.
+     *
+     * @return array|string Le contenu de la position ou le tableau des positions si $position = null.
+     */
     public function getPositionContent($position = null) {
 
         if ($position === null) {
@@ -219,6 +292,14 @@ class Document {
 
     }
 
+    /**
+     * Méthode pour définir le contenu d'une position.
+     *
+     * @param string $position Le nom de la position.
+     * @param string $content  Le contenu.
+     *
+     * @return Document Cette instance $this pour le chaining.
+     */
     public function setPositionContent($position, $content) {
 
         self::$content[$position] = $content;
@@ -226,12 +307,22 @@ class Document {
         return $this;
     }
 
+    /**
+     * Méthode pour récupérer et parser le template.
+     *
+     * @return Document Cette instance $this pour le chaining.
+     */
     public function parse() {
 
         return $this->fetchTemplate()
                     ->parseTemplate();
     }
 
+    /**
+     * Méthode pour effectuer le rendu du template.
+     *
+     * @return string Le rendu du template.
+     */
     public function render() {
 
         if (!empty($this->_template)) {
@@ -288,6 +379,12 @@ class Document {
         return $instance;
     }
 
+    /**
+     * Méthode pour charger le template HTML depuis le thème de l'application.
+     *
+     * @return Document Cette instance $this pour le chaining.
+     * @throws \RuntimeException si le fichier est introuvable.
+     */
     protected function fetchTemplate() {
 
         $contents = '';
@@ -312,6 +409,12 @@ class Document {
         return $this;
     }
 
+    /**
+     * Méthode pour analyser le fichier HTML et détecter les positions.
+     * Les positions sont sous forme de commentaires HTML (e.g. <!--[etd:navigation]-->)
+     *
+     * @return Document Cette instance $this pour le chaining.
+     */
     protected function parseTemplate() {
 
         $matches = array();
@@ -319,7 +422,7 @@ class Document {
         if (preg_match_all('#<!--\[etd:([^\]]+)\]-->#iU', $this->template, $matches)) {
             $positions = array();
 
-            // Step through the positions in reverse order.
+            // On parcourt les positions dans l'ordre inverse.
             for ($i = count($matches[0]) - 1; $i >= 0; $i--) {
                 $positions[$matches[1][$i]] = $matches[0][$i];
             }
@@ -337,6 +440,13 @@ class Document {
         return $this;
     }
 
+    /**
+     * Méthode pour effectuer le rendu du template.
+     * Tout d'abord, on récupère pour chaque position son contenu,
+     * ensuite on remplace leur balise respective par celui-ci.
+     *
+     * @return string Le rendu du template.
+     */
     protected function renderTemplate() {
 
         $replace = array();
