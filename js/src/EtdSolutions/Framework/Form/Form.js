@@ -93,40 +93,85 @@ EtdSolutions.Framework.Form = {
         return this;
     },
 
+    makeContentEditable: function(selector, fieldName) {
+
+        var $dom = $(selector),
+            self = this;
+
+        // On passe l'élément en mode éditable.
+        $dom.attr('contenteditable', 'true');
+        $dom.data('last-value', $dom.text());
+
+        // Quand l'utilisateur a fini l'édition.
+        $dom.on('blur', function() {
+
+            // Si le contenu à changé.
+            if ($dom.data('last-value') != $dom.text()) {
+
+                var data = {
+                    'task': 'updateField',
+                    'name': fieldName,
+                    'value': $dom.text()
+                };
+
+                self.postAjax(data, function() {
+                    $dom.data('last-value', $dom.text());
+                }, function(data) {
+                    alert(data.message);
+                });
+                console.log(data);
+
+            }
+        });
+
+        return this;
+    },
+
     prepareEditRow: function(row) {
 
-        row = $(row);
+        var self = this, $row = $(row), $input = $row.find('.inline-edit-input');
 
-        var self = this, input = row.find('.inline-edit-input');
-
-        row.find('.inline-edit-btn').on('click', function(e) {
+        $row.find('.inline-edit-btn').on('click', function(e) {
             e.preventDefault();
-            console.log(input.val());
-            input.data('prev-value', input.val());
-            row.addClass('editing');
+            $input.data('prev-value', $input.val());
+            $row.addClass('editing');
         });
 
-        row.find('.inline-cancel-btn').on('click', function(e) {
+        $row.find('.inline-cancel-btn').on('click', function(e) {
             e.preventDefault();
-            input.val(input.data('prev-value'));
-            row.removeClass('editing');
+            $input.val($input.data('prev-value'));
+            $row.removeClass('editing');
         });
 
-        row.find('.inline-save-btn').on('click', function(e) {
+        $row.find('.inline-save-btn').on('click', function(e) {
             e.preventDefault();
+
+            var value = $input.val(),
+                caption = '';
+
+            // On détermine le bon caption suivant le type.
+            switch ($input.prop('tagName').toLowerCase()) {
+                case 'select':
+                    caption = $input.find('option[value="' + value + '"]').text();
+                break;
+                default:
+                    caption = value;
+                break;
+            }
 
             var data = {
                 'task': 'updateField',
-                'name': input.attr('name'),
-                'value': input.val()
+                'name': $input.attr('name'),
+                'value': value
             };
 
             self.postAjax(data, function(data) {
-                row.removeClass('editing');
+                $row.find('.caption').html(caption);
+                $row.removeClass('editing');
             }, function(data) {
                 //raise error
-                input.val(input.data('prev-value'));
-                row.removeClass('editing');
+                $input.val($input.data('prev-value'));
+                $row.removeClass('editing');
             });
 
         });
