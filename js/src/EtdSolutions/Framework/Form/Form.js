@@ -12,6 +12,7 @@ EtdSolutions.Framework.Form = {
     $form: null,
     $filtersContainer: null,
     $filtersInputs: null,
+    $modal: null,
 
     options: {
         ajaxURI: null,
@@ -19,9 +20,16 @@ EtdSolutions.Framework.Form = {
         data: {},
         itemView: null,
         listView: null,
+        modalTemplate: '<div class="modal fade" id="form-modal"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">' + EtdSolutions.Framework.Language.Text._('APP_GLOBAL_CLOSE') + '</span></button><h4 class="modal-title"></h4></div><div class="modal-body"></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">' + EtdSolutions.Framework.Language.Text._('APP_GLOBAL_CLOSE') + '</button><button type="button" class="btn btn-primary">' + EtdSolutions.Framework.Language.Text._('APP_GLOBAL_OK') + '</button></div></div></div></div>',
+        modal: {
+            backdrop: true,
+            keyboard: true,
+            show: false,
+            remote: false
+        },
         selectors: {
             checkboxes: '.list-col-cb input',
-            itemButtons: '.btn-list',
+            itemButtons: '.btn-list:not(.btn-list-custom)',
             limitInput: '#limit',
             checkAll: 'input[name="checkAll"]',
             taskInput: 'input[name="task"]',
@@ -153,6 +161,23 @@ EtdSolutions.Framework.Form = {
         return this;
     },
 
+    addHiddenField: function(name, value) {
+
+        var field = this.$form.find('input[name="' + name + '"]');
+
+        if (field.length) {
+            field.attr('type', 'hidden');
+        } else {
+            field = $('<input type="hidden" name="' + name + '" value="">');
+            this.$form.append(field);
+        }
+
+        field.val(value);
+
+        return this;
+
+    },
+
     addSelectTask: function(btnId, task) {
         var self = this;
         $('#' + btnId).on('click', function(e) {
@@ -197,13 +222,92 @@ EtdSolutions.Framework.Form = {
         return this;
     },
 
+    selectCheckboxes: function(cbs) {
+
+        var self = this;
+
+        // On s'assure d'avoir un tableau.
+        if ($.type(cbs) != "array") {
+            cbs = [cbs];
+        }
+
+        // On décoche toutes les checkboxes.
+        this.$form.find(this.options.selectors.checkboxes).prop('checked', false);
+
+        // On coche celles qui nous intéressent.
+        $.each(cbs, function() {
+            self.$form.find(self.options.selectors.checkboxes + '[value="' + this + '"]').prop('checked', true);
+        });
+
+        return this;
+
+    },
+
     validate: function() {
         return true;
+    },
+
+    prepareModal: function(title, body, reset, options) {
+
+        reset = reset || false;
+        options = $.extend({}, this.options.modal, options);
+
+        // On supprime la modal existante si nécessaire.
+        if (reset && this.$modal && this.$modal.length) {
+            this.$modal.remove();
+        }
+
+        // On crée la nouvelle modal si nécessaire.
+        if (!this.$modal) {
+            this.$modal = $(this.options.modalTemplate);
+            $(document.body).append(this.$modal);
+        }
+
+        this.$modal.find('.modal-title').html(title);
+        this.$modal.find('.modal-body').html(body);
+
+        this.$modal.modal(options);
+
+        return this;
+
+    },
+
+    doModal: function(method) {
+        if (this.$modal) {
+            this.$modal.modal(method);
+        }
+        return this;
+    },
+
+    showModal: function() {
+        return this.doModal('show');
+    },
+
+    hideModal: function() {
+        return this.doModal('hide');
     },
 
     onListBtnClick: function(e) {
         e.preventDefault();
         var target = $(e.delegateTarget), data = target.attr('href').split('/').splice(1);
+
+        if (target.hasClass('btn-list-modal')) {
+
+            var remoteURI = this.options.ajaxURI + '/' + data[1] + '/' + data[2];
+            if (data.length == 4) {
+                remoteURI += '/' + data[3];
+            }
+
+            this.prepareModal('', '', true, {
+               remote: remoteURI
+            });
+
+            this.showModal();
+
+            return this;
+
+        }
+
         this.$form.find(this.options.selectors.checkboxes).prop('checked', false);
         this.$form.find(this.options.selectors.checkboxes + '[value="' + data.pop() + '"]').prop('checked', true);
         this.$form.find(this.options.selectors.taskInput).val(data.pop());

@@ -1,3 +1,3 @@
 if (typeof(EtdSolutions) === 'undefined') {
-    var EtdSolutions = {};
+    window.EtdSolutions = EtdSolutions = {};
 }
