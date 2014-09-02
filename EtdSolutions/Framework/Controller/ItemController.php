@@ -105,8 +105,7 @@ class ItemController extends Controller {
         }
 
         // On passe en layout de création (form).
-        $this->getInput()
-             ->set('layout', 'form');
+        $this->setLayout('form');
 
         // On affiche la vue.
         return $this->display();
@@ -144,8 +143,7 @@ class ItemController extends Controller {
         }
 
         // On passe en layout de création (form).
-        $this->getInput()
-             ->set('layout', 'form');
+        $this->setLayout('form');
 
         // On affiche la vue.
         return $this->display();
