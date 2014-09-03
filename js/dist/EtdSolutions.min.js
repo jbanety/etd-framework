@@ -1005,6 +1005,7 @@ EtdSolutions.Framework.Form = {
         itemView: null,
         listView: null,
         modalTemplate: '<div class="modal fade" id="form-modal"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">' + EtdSolutions.Framework.Language.Text._('APP_GLOBAL_CLOSE') + '</span></button><h4 class="modal-title"></h4></div><div class="modal-body"></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">' + EtdSolutions.Framework.Language.Text._('APP_GLOBAL_CLOSE') + '</button><button type="button" class="btn btn-primary">' + EtdSolutions.Framework.Language.Text._('APP_GLOBAL_OK') + '</button></div></div></div></div>',
+        modalRemoteTemplate: '<div class="modal fade" id="form-modal"><div class="modal-dialog"><div class="modal-content"></div></div></div>',
         modal: {
             backdrop: true,
             keyboard: true,
@@ -1079,8 +1080,7 @@ EtdSolutions.Framework.Form = {
 
     makeContentEditable: function(selector, fieldName) {
 
-        var $dom = $(selector),
-            self = this;
+        var $dom = $(selector), self = this;
 
         // On passe l'élément en mode éditable.
         $dom.attr('contenteditable', 'true');
@@ -1130,17 +1130,16 @@ EtdSolutions.Framework.Form = {
         $row.find('.inline-save-btn').on('click', function(e) {
             e.preventDefault();
 
-            var value = $input.val(),
-                caption = '';
+            var value = $input.val(), caption = '';
 
             // On détermine le bon caption suivant le type.
             switch ($input.prop('tagName').toLowerCase()) {
                 case 'select':
                     caption = $input.find('option[value="' + value + '"]').text();
-                break;
+                    break;
                 default:
                     caption = value;
-                break;
+                    break;
             }
 
             var data = {
@@ -1288,7 +1287,7 @@ EtdSolutions.Framework.Form = {
 
         // On crée la nouvelle modal si nécessaire.
         if (!this.$modal) {
-            this.$modal = $(this.options.modalTemplate);
+            this.$modal = $((options.remote) ? this.options.modalRemoteTemplate : this.options.modalTemplate);
             $(document.body).append(this.$modal);
         }
 
@@ -1328,7 +1327,7 @@ EtdSolutions.Framework.Form = {
             }
 
             this.prepareModal('', '', true, {
-               remote: remoteURI
+                remote: remoteURI
             });
 
             this.showModal();

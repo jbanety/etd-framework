@@ -1,11 +1,11 @@
 {
-  "id": "b0fefbdf",
+  "id": "d669df78",
   "cfgVersion": 1,
   "name": "Framework JS",
   "files": {
     "0fd04f3c": {
       "id": "0fd04f3c",
-      "pid": "b0fefbdf",
+      "pid": "d669df78",
       "name": "EtdSolutions.js",
       "input": "dist/EtdSolutions.js",
       "customOutput": "dist/EtdSolutions.min.js",
@@ -19,7 +19,7 @@
     },
     "c699366e": {
       "id": "c699366e",
-      "pid": "b0fefbdf",
+      "pid": "d669df78",
       "name": "build.js",
       "input": "src/build.js",
       "customOutput": "dist/EtdSolutions.js",
@@ -30,12 +30,26 @@
         "mangle": true,
         "sourcemaps": false
       }
+    },
+    "7e3bd46b": {
+      "id": "7e3bd46b",
+      "pid": "d669df78",
+      "name": "Form.js",
+      "input": "../../../../../../EtdGlobalOne/submodules/jbanety/etd-framework/js/src/EtdSolutions/Framework/Form/Form.js",
+      "customOutput": false,
+      "type": "Js",
+      "config": {
+        "autoCompile": true,
+        "uglify": true,
+        "mangle": true,
+        "sourcemaps": false
+      }
     }
   },
   "imports": {
     "54895686": {
       "id": "54895686",
-      "pid": "b0fefbdf",
+      "pid": "d669df78",
       "path": "dependencies/jquery.tablednd.js",
       "parents": [
         "c699366e"
@@ -43,7 +57,7 @@
     },
     "60e4d8ba": {
       "id": "60e4d8ba",
-      "pid": "b0fefbdf",
+      "pid": "d669df78",
       "path": "dependencies/sprintf.js",
       "parents": [
         "c699366e"
@@ -51,7 +65,7 @@
     },
     "e50cc2a0": {
       "id": "e50cc2a0",
-      "pid": "b0fefbdf",
+      "pid": "d669df78",
       "path": "src/EtdSolutions/EtdSolutions.js",
       "parents": [
         "c699366e"
@@ -59,7 +73,7 @@
     },
     "c3d8561b": {
       "id": "c3d8561b",
-      "pid": "b0fefbdf",
+      "pid": "d669df78",
       "path": "src/EtdSolutions/Framework/Framework.js",
       "parents": [
         "c699366e"
@@ -67,7 +81,7 @@
     },
     "ef191a74": {
       "id": "ef191a74",
-      "pid": "b0fefbdf",
+      "pid": "d669df78",
       "path": "src/EtdSolutions/Framework/Form/Form.js",
       "parents": [
         "c699366e"
@@ -75,7 +89,7 @@
     },
     "f6ab0b76": {
       "id": "f6ab0b76",
-      "pid": "b0fefbdf",
+      "pid": "d669df78",
       "path": "src/EtdSolutions/Framework/Language/Language.js",
       "parents": [
         "c699366e"
@@ -83,7 +97,7 @@
     },
     "f232a141": {
       "id": "f232a141",
-      "pid": "b0fefbdf",
+      "pid": "d669df78",
       "path": "src/EtdSolutions/Framework/Language/Text.js",
       "parents": [
         "c699366e"
