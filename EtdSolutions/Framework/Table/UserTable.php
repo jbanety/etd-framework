@@ -1,23 +1,20 @@
 <?php
 /**
- * @package     ProjectPipeline
+ * @package     etd-framework
  *
  * @version     0.0.1
- * @copyright   Copyright (C) 2014 Jean-Baptiste Alleaume. Tous droits réservés.
- * @license     http://alleau.me/LICENSE
- * @author      Jean-Baptiste Alleaume http://alleau.me
+ * @copyright   Copyright (C) 2014 ETD Solutions, SARL Etudoo. Tous droits réservés.
+ * @license     http://etd-solutions.com/LICENSE
+ * @author      ETD Solutions http://etd-solutions.com
  */
 
 namespace EtdSolutions\Framework\Table;
 
 use EtdSolutions\Framework\Application\Web;
-use Joomla\Crypt\Crypt;
+use EtdSolutions\Framework\User\User;
 use Joomla\Crypt\Password\Simple;
-use Joomla\Data\DataObject;
 use Joomla\Date\Date;
-use Joomla\Language\Text;
 use Joomla\Registry\Registry;
-use Joomla\Utilities\ArrayHelper;
 
 defined('_JEXEC') or die;
 
@@ -96,7 +93,7 @@ class UserTable extends Table {
             // On contrôle le mot de passe et on crée le mot de passe crypté si besoin.
             if (empty($this->password)) {
                 $simpleAuth = new Simple();
-                $this->setProperty('password', $simpleAuth->create($this->genRandomPassword()));
+                $this->setProperty('password', $simpleAuth->create(User::genRandomPassword()));
             }
 
             // On définit la date d'inscription.
@@ -155,37 +152,6 @@ class UserTable extends Table {
 
         return true;
 
-    }
-
-    /**
-     * Génère un mot de passe aléatoire.
-     *
-     * @param   integer $length Longueur du mot de passe à générer.
-     *
-     * @return  string  Le mot de passe aléatoire.
-     */
-    protected function genRandomPassword($length = 8) {
-
-        $salt     = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        $base     = strlen($salt);
-        $makepass = '';
-
-        /*
-         * Start with a cryptographic strength random string, then convert it to
-         * a string with the numeric base of the salt.
-         * Shift the base conversion on each character so the character
-         * distribution is even, and randomize the start shift so it's not
-         * predictable.
-         */
-        $random = Crypt::genRandomBytes($length + 1);
-        $shift  = ord($random[0]);
-
-        for ($i = 1; $i <= $length; ++$i) {
-            $makepass .= $salt[($shift + ord($random[$i])) % $base];
-            $shift += ord($random[$i]);
-        }
-
-        return $makepass;
     }
 
 }

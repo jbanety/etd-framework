@@ -14,8 +14,10 @@ use EtdSolutions\Framework\Controller\ErrorController;
 use EtdSolutions\Framework\Document\Document;
 use EtdSolutions\Framework\User\User;
 use Joomla\Application\AbstractWebApplication;
+use Joomla\Crypt\Password\Simple;
 use Joomla\Database\DatabaseFactory;
 use Joomla\Database\DatabaseDriver;
+use Joomla\Filter\InputFilter;
 use Joomla\Language\Language;
 use Joomla\Language\Text;
 use Joomla\Registry\Registry;
@@ -71,6 +73,7 @@ final class Web extends AbstractWebApplication {
         $config = new Registry(new \JConfig());
 
         parent::__construct($input, $config, $client);
+
     }
 
     /**
@@ -486,6 +489,323 @@ final class Web extends AbstractWebApplication {
     }
 
     /**
+     * Méthode d'authentification lors de la connexion.
+     *
+     * @param   array  $credentials  Array('username' => string, 'password' => string)
+     * @param   array  $options      Array('remember' => boolean)
+     *
+     * @return  boolean  True en cas de succès.
+     */
+    public function login($credentials, $options = array()) {
+
+        // Si on a demandé l'authentification par cookie.
+        if (isset($options['useCookie']) && $options['useCookie']) {
+
+            // On récupère le cookie.
+            $cookieName  = $this->getShortHashedUserAgent();
+            $cookieValue = $this->input->cookie->get($cookieName);
+
+            if (!$cookieValue) {
+
+                if (!isset($options['silent']) || !$options['silent']) {
+                    $this->enqueueMessage(Text::_("APP_ERROR_LOGIN_INVALID_COOKIE"), "danger");
+                }
+
+                return false;
+            }
+
+            $cookieArray = explode('.', $cookieValue);
+
+            // On contrôle que le cookie est valide.
+            if (count($cookieArray) != 2) {
+
+                // On détruit le cookie dans le navigateur.
+                $this->input->cookie->set($cookieName, false, time() - 42000, $this->get('cookie_path', '/'), $this->get('cookie_domain'));
+
+                if (!isset($options['silent']) || !$options['silent']) {
+                    $this->enqueueMessage(Text::_("APP_ERROR_LOGIN_INVALID_COOKIE"), "danger");
+                }
+
+                return false;
+            }
+
+            // On filtre les entrées car on va les utiliser dans la requête.
+            $filter	= new InputFilter;
+            $series	= $filter->clean($cookieArray[1], 'ALNUM');
+
+            // On retire les jetons expirés.
+            $query = $this->db->getQuery(true)
+                ->delete('#__user_keys')
+                ->where($this->db->quoteName('time') . ' < ' . $this->db->quote(time()));
+            $this->db->setQuery($query)->execute();
+
+            // On trouve un enregistrement correspondant s'il existe.
+            $query = $this->db->getQuery(true)
+                ->select($this->db->quoteName(array('user_id', 'token', 'series', 'time')))
+                ->from($this->db->quoteName('#__user_keys'))
+                ->where($this->db->quoteName('series') . ' = ' . $this->db->quote($series))
+                ->where($this->db->quoteName('uastring') . ' = ' . $this->db->quote($cookieName))
+                ->order($this->db->quoteName('time') . ' DESC');
+            $results = $this->db->setQuery($query)->loadObjectList();
+
+            if (count($results) !== 1) {
+
+                // On détruit le cookie dans le navigateur.
+                $this->input->cookie->set($cookieName, false, time() - 42000, $this->get('cookie_path', '/'), $this->get('cookie_domain'));
+
+                if (!isset($options['silent']) || !$options['silent']) {
+                    $this->enqueueMessage(Text::_("APP_ERROR_LOGIN_INVALID_COOKIE"), "danger");
+                }
+
+                return false;
+            } else { // On a un utilisateur avec un cookie valide qui correspond à un enregistrement en base.
+
+                // On instancie la mécanique de vérification.
+                $simpleAuth = new Simple();
+
+                //$token = $simpleAuth->create($cookieArray[0]);
+
+                if (!$simpleAuth->verify($cookieArray[0], $results[0]->token)) {
+
+                    // C'est une attaque réelle ! Soit on a réussi à créer un cookie valide ou alors on a volé le cookie et utilisé deux fois (une fois par le pirate et une fois par la victime).
+                    // On supprime tous les jetons pour cet utilisateur !
+                    $query = $this->db->getQuery(true)
+                        ->delete('#__user_keys')
+                        ->where($this->db->quoteName('user_id') . ' = ' . $this->db->quote($results[0]->user_id));
+                    $this->db->setQuery($query)->execute();
+
+                    // On détruit le cookie dans le navigateur.
+                    $this->input->cookie->set($cookieName, false, time() - 42000, $this->get('cookie_path', '/'), $this->get('cookie_domain'));
+
+                    //@TODO: logguer l'attaque et envoyer un mail à l'admin.
+
+                    if (!isset($options['silent']) || !$options['silent']) {
+                        $this->enqueueMessage(Text::_("APP_ERROR_LOGIN_INVALID_COOKIE"), "danger");
+                    }
+
+                    return false;
+                }
+            }
+
+            // On s'assure qu'il y a bien un utilisateur avec cet identifiant et on récupère les données dans la session.
+            $query = $this->db->getQuery(true)
+                ->select($this->db->quoteName(array('id', 'username', 'password')))
+                ->from($this->db->quoteName('#__users'))
+                ->where($this->db->quoteName('username') . ' = ' . $this->db->quote($results[0]->user_id))
+                ->where($this->db->quoteName('requireReset') . ' = 0');
+            $result = $this->db->setQuery($query)->loadObject();
+
+            if ($result) {
+
+                // On charge l'utilisateur.
+                $user = User::getInstance($result->id);
+
+                // On met à jour la session.
+                $session = $this->getSession();
+                $session->set('user', $user);
+
+                // On met à jour les champs dans la table de session.
+                $this->db->setQuery(
+                    $this->db->getQuery(true)
+                        ->update($this->db->quoteName('#__session'))
+                        ->set($this->db->quoteName('guest') . ' = 0')
+                        ->set($this->db->quoteName('username') . ' = ' . $this->db->quote($user->username))
+                        ->set($this->db->quoteName('userid') . ' = ' . (int) $user->id)
+                        ->where($this->db->quoteName('session_id') . ' = ' . $this->db->quote($session->getId()))
+                );
+
+                $this->db->execute();
+
+                // On crée un cookie d'authentification.
+                $options['user'] = $user;
+                $this->createAuthenticationCookie($options);
+
+                return true;
+            }
+
+            if (!isset($options['silent']) || !$options['silent']) {
+                $this->enqueueMessage(Text::_("APP_ERROR_LOGIN_NO_USER"), "danger");
+            }
+
+            return false;
+
+        } else { // Sinon on procède à l'authentification classique.
+
+            // On vérifie les données.
+            $this->db->setQuery(
+                $this->db->getQuery(true)
+                    ->select('id, password, username, block')
+                    ->from('#__users')
+                    ->where('username = ' . $this->db->quote($credentials['username'])
+                    )
+            );
+
+            $res = $this->db->loadObject();
+
+            // Si on a trouvé l'utilisateur.
+            // C'est déjà pas mal !
+            if ($res) {
+
+                // Si l'utilisateur est bloqué, il lui est impossible de se connecter.
+                if ($res->block == "1") {
+
+                    if (!isset($options['silent']) || !$options['silent']) {
+                        $this->enqueueMessage(Text::_("APP_ERROR_LOGIN_BLOCKED_USER"), "danger");
+                    }
+
+                    return false;
+                }
+
+                // On instancie la mécanique de vérification.
+                $simpleAuth = new Simple();
+
+                // On contrôle le mot de passe avec le hash dans la base de données.
+                if ($simpleAuth->verify($credentials['password'], $res->password)) {
+
+                    // C'est bon !
+
+                    // On charge l'utilisateur.
+                    $user = User::getInstance($res->id);
+
+                    // On met à jour la session.
+                    $session = $this->getSession();
+                    $session->set('user', $user);
+
+                    // On met à jour les champs dans la table de session.
+                    $this->db->setQuery(
+                        $this->db->getQuery(true)
+                            ->update($this->db->quoteName('#__session'))
+                            ->set($this->db->quoteName('guest') . ' = 0')
+                            ->set($this->db->quoteName('username') . ' = ' . $this->db->quote($user->username))
+                            ->set($this->db->quoteName('userid') . ' = ' . (int) $user->id)
+                            ->where($this->db->quoteName('session_id') . ' = ' . $this->db->quote($session->getId()))
+                    );
+
+                    $this->db->execute();
+
+                    // On crée un cookie d'authentification.
+                    $options['user'] = $user;
+                    $this->createAuthenticationCookie($options);
+
+                    return true;
+                }
+
+            }
+
+            if (isset($options['silent']) && !$options['silent']) {
+                $this->enqueueMessage(Text::_("APP_ERROR_LOGIN_INVALID_USERNAME_OR_PASSWORD"), "danger");
+            }
+
+            return false;
+
+        }
+
+    }
+
+    /**
+     * Méthode pour récupérer un hash du user agent qui n'inclut pas la version du navigateur.
+     * A cause du changement régulier de version.
+     *
+     * @return  string  Un hash du user agent avec la version remplacée par 'abcd'
+     */
+    public function getShortHashedUserAgent() {
+
+        $uaString       = $this->client->userAgent;
+        $browserVersion = $this->client->browserVersion;
+        $uaShort        = str_replace($browserVersion, 'abcd', $uaString);
+
+        return md5($this->get('uri.base.full') . $uaShort);
+    }
+
+    /**
+     * Méthode pour créer un cookie d'authentification pour l'utilisateur.
+     *
+     * @param array $options Un tableau d'options.
+     *
+     * @return bool True en cas de succès, false sinon.
+     */
+    protected function createAuthenticationCookie($options) {
+
+        // L'utilisateur a utilisé un cookie pour se connecter.
+        if (isset($options['useCookie']) && $options['useCookie']) {
+
+            $cookieName	= $this->getShortHashedUserAgent();
+
+            // On a besoin des anciennes données pour récupérer la série existante.
+            $cookieValue = $this->input->cookie->get($cookieName);
+            $cookieArray = explode('.', $cookieValue);
+
+            // On filtre la série car on va les utiliser dans la requête.
+            $filter	= new InputFilter;
+            $series	= $filter->clean($cookieArray[1], 'ALNUM');
+
+        } elseif (isset($options['remember']) && $options['remember']) { // Ou il a demandé à être reconnu lors sa prochaine connexion.
+
+            $cookieName	= $this->getShortHashedUserAgent();
+
+            // On crée une série unique qui sera utilisée pendant la durée de vie du cookie.
+            $unique = false;
+
+            do {
+                $series = User::genRandomPassword(20);
+                $query = $this->db->getQuery(true)
+                    ->select($this->db->quoteName('series'))
+                    ->from($this->db->quoteName('#__user_keys'))
+                    ->where($this->db->quoteName('series') . ' = ' . $this->db->quote($series));
+                $results = $this->db->setQuery($query)->loadResult();
+
+                if (is_null($results)) {
+                    $unique = true;
+                }
+
+            } while ($unique === false);
+
+        } else { // Sinon, on ne fait rien.
+
+            return false;
+        }
+
+        // On récupère les valeurs de la configuration.
+        $lifetime = $this->get('cookie_lifetime', '60') * 24 * 60 * 60;
+        $length	  = $this->get('key_length', '16');
+
+        // On génère un nouveau cookie.
+        $token       = User::genRandomPassword($length);
+        $cookieValue = $token . '.' . $series;
+
+        // On écrase le cookie existant avec la nouvelle valeur.
+        $this->input->cookie->set(
+            $cookieName, $cookieValue, time() + $lifetime, $this->get('cookie_path', '/'), $this->get('cookie_domain'), $this->isSSLConnection()
+        );
+        $query = $this->db->getQuery(true);
+
+        if (isset($options['remember']) && $options['remember']) {
+
+            // On crée un nouvel enregistrement.
+            $query
+                ->insert($this->db->quoteName('#__user_keys'))
+                ->set($this->db->quoteName('user_id') . ' = ' . $this->db->quote($options['user']->username))
+                ->set($this->db->quoteName('series') . ' = ' . $this->db->quote($series))
+                ->set($this->db->quoteName('uastring') . ' = ' . $this->db->quote($cookieName))
+                ->set($this->db->quoteName('time') . ' = ' . (time() + $lifetime));
+        } else {
+            // On met à jour l'enregistrement existant avec le nouveau jeton.
+            $query
+                ->update($this->db->quoteName('#__user_keys'))
+                ->where($this->db->quoteName('user_id') . ' = ' . $this->db->quote($options['user']->username))
+                ->where($this->db->quoteName('series') . ' = ' . $this->db->quote($series))
+                ->where($this->db->quoteName('uastring') . ' = ' . $this->db->quote($cookieName));
+        }
+
+        $simpleAuth   = new Simple();
+        $hashed_token = $simpleAuth->create($token);
+        $query->set($this->db->quoteName('token') . ' = ' . $this->db->quote($hashed_token));
+        $this->db->setQuery($query)->execute();
+
+        return true;
+    }
+
+    /**
      * Initialise l'application.
      *
      * C'est ici qu'on instancie le routeur de l'application les routes correspondantes vers les controllers.
@@ -548,6 +868,9 @@ final class Web extends AbstractWebApplication {
      * Effectue la logique de l'application.
      */
     protected function doExecute() {
+
+        // On tente d'auto-connecter l'utilisateur.
+        $this->loginWithCookie();
 
         // On récupère le controller.
         $controller = $this->route();
@@ -721,6 +1044,29 @@ final class Web extends AbstractWebApplication {
         } catch (\RuntimeException $e) {
             exit($e->getMessage());
         }
+    }
+
+    /**
+     * Méthode pour tenter d'auto-connecter l'utilisateur (non connecté bien sûr) grâce au cookie.
+     */
+    protected function loginWithCookie() {
+
+        // On procède à l'authentification de l'utilisateur par cookie s'il n'est pas déjà connecté.
+        $user = $this->getSession()->get('user');
+        if (!$user || ($user && $user->isGuest())) {
+
+            $cookieName = $this->getShortHashedUserAgent();
+
+            // On contrôle que le cookie existe.
+            if ($this->input->cookie->get($cookieName)) {
+
+                // On effectue une authentification silencieuse.
+                $this->login(array('username' => ''), array('useCookie' => true));//, 'silent' => true));
+
+            }
+
+        }
+
     }
 
 }

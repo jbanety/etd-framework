@@ -13,12 +13,23 @@ namespace EtdSolutions\Framework\User;
 use EtdSolutions\Framework\Application\Web;
 use EtdSolutions\Framework\Model\Model;
 use EtdSolutions\Framework\Table\Table;
+use Joomla\Crypt\Crypt;
 use Joomla\Data\DataObject;
+use Joomla\Filter\InputFilter;
 use Joomla\Language\Text;
 use Joomla\Registry\Registry;
 
 defined('_JEXEC') or die;
 
+/**
+ * Class User
+ * @package EtdSolutions\Framework\User
+ *
+ * @property integer  $id     L'identifiant de l'utilisateur.
+ * @property bool     $guest  True si l'utilisateur n'est pas connecté.
+ * @property Registry $rights Un registre contenant les droits de l'utilisateur.
+ * @property Registry $params Un registre contenant les paramètres personnalisés de l'utilisateur.
+ */
 class User extends DataObject {
 
     /**
@@ -186,10 +197,10 @@ class User extends DataObject {
     public function logout() {
 
         $my      = self::getInstance();
-        $session = Web::getInstance()
-                      ->getSession();
-        $db      = Web::getInstance()
-                      ->getDb();
+        $app     = Web::getInstance();
+        $session = $app->getSession();
+        $db      = $app->getDb();
+        $input   = $app->getInput();
 
         // Est-on en train de supprimer la session en cours ?
         if ($my->id == $this->id) {
@@ -207,8 +218,64 @@ class User extends DataObject {
                          ->where($db->quoteName('userid') . ' = ' . (int)$this->id))
            ->execute();
 
+        // On supprime tous les cookie d'authentification de l'utilisateur.
+        $cookieName	 = $app->getShortHashedUserAgent();
+        $cookieValue = $input->cookie->get($cookieName);
+
+        // S'il n y a de cookie à supprimer.
+        if (!$cookieValue) {
+            return true;
+        }
+
+        $cookieArray = explode('.', $cookieValue);
+
+        // On filtre la série car on l'utilise dans la requête.
+        $filter	= new InputFilter;
+        $series	= $filter->clean($cookieArray[1], 'ALNUM');
+
+        // On supprime l'enregistrement dans la base de données.
+        $query = $db->getQuery(true);
+        $query
+            ->delete('#__user_keys')
+            ->where($db->quoteName('series') . ' = ' . $db->quote($series));
+        $db->setQuery($query)->execute();
+
+        // On supprime le cookie.
+        $input->cookie->set($cookieName, false, time() - 42000, $app->get('cookie_path', '/'), $app->get('cookie_domain'));
+
         return true;
 
+    }
+
+    /**
+     * Génère un mot de passe aléatoire.
+     *
+     * @param   integer $length Longueur du mot de passe à générer.
+     *
+     * @return  string  Le mot de passe aléatoire.
+     */
+    public static function genRandomPassword($length = 8) {
+
+        $salt     = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $base     = strlen($salt);
+        $makepass = '';
+
+        /*
+         * Start with a cryptographic strength random string, then convert it to
+         * a string with the numeric base of the salt.
+         * Shift the base conversion on each character so the character
+         * distribution is even, and randomize the start shift so it's not
+         * predictable.
+         */
+        $random = Crypt::genRandomBytes($length + 1);
+        $shift  = ord($random[0]);
+
+        for ($i = 1; $i <= $length; ++$i) {
+            $makepass .= $salt[($shift + ord($random[$i])) % $base];
+            $shift += ord($random[$i]);
+        }
+
+        return $makepass;
     }
 
 }
