@@ -158,10 +158,14 @@ abstract class Controller extends AbstractController {
 
     public function display($view = null) {
 
-        // Par défaut, les vues ne sont disponibles qu'aux utilisateurs authentifiés.
-        $user = User::getInstance();
-        if ($user->isGuest()) {
-            $this->redirect('/login', Text::_('APP_ERROR_MUST_BE_LOGGED'), 'warning');
+        $app = $this->getApplication();
+
+        // Si configuré, les vues ne sont disponibles qu'aux utilisateurs authentifiés.
+        if ($app->get('lock_display', true)) {
+            $user = User::getInstance();
+            if ($user->isGuest()) {
+                $this->redirect('/login', Text::_('APP_ERROR_MUST_BE_LOGGED'), 'warning');
+            }
         }
 
         return $this->renderView($view);
