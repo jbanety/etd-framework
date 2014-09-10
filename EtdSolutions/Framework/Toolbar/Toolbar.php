@@ -174,10 +174,10 @@ class Toolbar {
     public function render() {
 
         // Get the layout path.
-        $path = JPATH_THEME . "/html/toolbar.php";
+        $path = JPATH_THEME . "/html/layouts/toolbar.php";
 
         // Check if the layout path was found.
-        if (!$path) {
+        if (!file_exists($path)) {
             throw new \RuntimeException('Toolbar Layout Path Not Found');
         }
 
