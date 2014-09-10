@@ -106,10 +106,10 @@ class Pagination extends DataObject {
     public function render() {
 
         // Get the layout path.
-        $path = JPATH_THEME . "/html/pagination.php";
+        $path = JPATH_THEME . "/html/layouts/pagination.php";
 
         // Check if the layout path was found.
-        if (!$path) {
+        if (!file_exists($path)) {
             throw new \RuntimeException('Pagination Layout Path Not Found');
         }
 
