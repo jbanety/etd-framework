@@ -386,6 +386,23 @@ abstract class Table extends DataObject {
     }
 
     /**
+     * Méthode pour effacer toutes les valeurs des propriétés de la classe.
+     * La clé primaire sera ignorée.
+     *
+     * @return  void
+     */
+    public function clear() {
+
+        foreach ($this->getFields() as $k) {
+            if ($k != $this->getPk()) {
+                $this->setProperty($k, null);
+            }
+        }
+
+        $this->clearErrors();
+    }
+
+    /**
      * Contrôle que la clé primaire a été définit.
      *
      * @return  boolean  True si la clé primaire est définit.
