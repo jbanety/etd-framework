@@ -11,6 +11,7 @@
 namespace EtdSolutions\Framework\Table;
 
 use EtdSolutions\Framework\User\User;
+use Joomla\Language\Text;
 use Joomla\Utilities\ArrayHelper;
 
 defined('_JEXEC') or die;
@@ -738,6 +739,19 @@ abstract class NestedTable extends Table {
             }
         }
 
+        // On détermine le bon champ.
+        $fields = $this->getFields();
+        $field  = null;
+        if (in_array('published', $fields)) {
+            $field = 'published';
+        } elseif (in_array('state', $fields)) {
+            $field = 'state';
+        } else {
+            $this->addError(Text::_('APP_ERROR_TABLE_NO_PUBLISHED_FIELD'));
+
+            return false;
+        }
+
         // On passe sur chacune des clé primaire.
         foreach ($pks as $pk) {
 
@@ -757,7 +771,8 @@ abstract class NestedTable extends Table {
                       ->where('n.lft < ' . (int)$node->lft)
                       ->where('n.rgt > ' . (int)$node->rgt)
                       ->where('n.parent_id > 0')
-                      ->where('n.published < ' . (int)$compareState);
+                      ->where('n.' . $this->getDb()
+                                          ->quoteName($field) . ' < ' . (int)$compareState);
 
                 if ($where) {
                     $query->where($where);
@@ -779,7 +794,8 @@ abstract class NestedTable extends Table {
             $query->clear()
                   ->update($this->getDb()
                                 ->quoteName($this->getTable()))
-                  ->set('published = ' . (int)$state)
+                  ->set($this->getDb()
+                             ->quoteName($field) . ' = ' . (int)$state)
                   ->where('(lft > ' . (int)$node->lft . ' AND rgt < ' . (int)$node->rgt . ') OR ' . $k . ' = ' . (int)$pk);
 
             if ($where) {
@@ -793,7 +809,7 @@ abstract class NestedTable extends Table {
         }
 
         if (in_array($this->$k, $pks)) {
-            $this->setProperty('published', $state);
+            $this->setProperty($field, $state);
         }
 
         $this->clearErrors();
