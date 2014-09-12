@@ -33,6 +33,7 @@ class Field_Boolean extends Field {
 
         $class       = $this->element['class'] ? ' ' . (string)$this->element['class'] : '';
         $buttonClass = $this->element['buttonClass'] ? ' ' . (string)$this->element['buttonClass'] : '';
+        $readonly = isset($this->element['readonly']) ? (bool)$this->element['readonly'] : false;
 
         $checked1 = '';
         $active1  = '';
@@ -49,14 +50,34 @@ class Field_Boolean extends Field {
 
         }
 
-        return '<div class="form-control-static"><div class="btn-group' . $class . '" data-toggle="buttons">
+        $html = '<div class="form-control-static">';
+
+        if ($readonly) {
+
+            $html .= '<input type="hidden" name="' . $this->name . '" value="' . $this->value . '">';
+
+            if (empty($checked0)) {
+                $html .= Text::_('APP_GLOBAL_YES');
+            } else {
+                $html .= Text::_('APP_GLOBAL_NO');
+            }
+
+        } else {
+
+            $html .= '<div class="btn-group' . $class . '" data-toggle="buttons">
   <label class="btn' . $buttonClass . $active1 . '">
     <input type="radio" name="' . $this->name . '" id="' . $this->id . '1"' . $checked1 . ' value="1"> ' . Text::_("APP_GLOBAL_YES") . '
   </label>
   <label class="btn' . $buttonClass . $active0 . '">
     <input type="radio" name="' . $this->name . '" id="' . $this->id . '0"' . $checked0 . ' value="0"> ' . Text::_("APP_GLOBAL_NO") . '
   </label>
-</div></div>';
+</div>';
+
+        }
+
+        $html .= '</div>';
+
+        return $html;
 
     }
 }
