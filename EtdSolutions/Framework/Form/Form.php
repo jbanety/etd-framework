@@ -20,6 +20,10 @@ defined('_JEXEC') or die;
  */
 class Form extends JoomlaForm {
 
+    public function getXML() {
+        return $this->xml->asXML();
+    }
+
     public function validate($data, $group = null, $fieldName = null) {
 
         if (is_null($fieldName)) {
