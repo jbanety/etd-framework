@@ -127,15 +127,8 @@ abstract class ItemModel extends Model {
         // On instancie le formulaire.
         $form = new Form($name, $options);
 
-        // On ajoute le chemin vers les fichiers XML.
-        FormHelper::addFormPath(JPATH_FORMS);
-
-        // On ajoute le chemin vers les types de champs et les règles.
-        $app  = Web::getInstance();
-        $path = Path::clean(JPATH_LIBRARIES . $app->get('app_namespace') . "/Form/Field");
-        FormHelper::addFieldPath($path);
-        $path = Path::clean(JPATH_LIBRARIES . $app->get('app_namespace') . "/Form/Rule");
-        FormHelper::addRulePath($path);
+        // On ajoute les chemins.
+        $this->loadFormPaths();
 
         // On charge les champs depuis le XML.
         if (!$form->loadFile($name)) {
@@ -459,6 +452,27 @@ abstract class ItemModel extends Model {
      */
     public function cleanCache($id = null) {
         //@TODO: implémenter le mécanisme de cache.
+    }
+
+    /**
+     * Méthode pour charger les chemins des classes persos pour le formulaire.
+     */
+    protected function loadFormPaths() {
+
+        // Application.
+        $app  = Web::getInstance();
+
+        // On ajoute le chemin vers les fichiers XML des formulaires.
+        FormHelper::addFormPath(JPATH_FORMS);
+
+        // On ajoute le chemin vers les types de champs.
+        $path = Path::clean(JPATH_LIBRARIES . $app->get('app_namespace') . "/Form/Field");
+        FormHelper::addFieldPath($path);
+
+        // On ajoute le chemin vers les règles.
+        $path = Path::clean(JPATH_LIBRARIES . $app->get('app_namespace') . "/Form/Rule");
+        FormHelper::addRulePath($path);
+
     }
 
     /**
