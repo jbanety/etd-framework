@@ -988,13 +988,25 @@ final class Web extends AbstractWebApplication {
 
         } else {
             $this->raiseError(Text::_('APP_ERROR_INVALID_RESULT'));
-
-            return false;
         }
 
         // On affecte le résultat au corps de la réponse.
         $this->setBody($data);
 
+    }
+
+    /**
+     * Méthode pour envoyer la réponse de l'application au client.
+     * Toutes les entêtes seront envoyées avant le contenu principal
+     * des données de sortie de l'application.
+     *
+     * @return  void
+     */
+    protected function respond() {
+        parent::respond();
+
+        // On oublie pas de fermer la porte en partant !
+        $this->close();
     }
 
     /**
