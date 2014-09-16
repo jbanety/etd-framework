@@ -19,6 +19,7 @@
 // @prepros-append "../src/EtdSolutions/Framework/Framework.js";
 // @prepros-append "../src/EtdSolutions/Framework/Language/Language.js";
 // @prepros-append "../src/EtdSolutions/Framework/Language/Text.js";
+// @prepros-append "../src/EtdSolutions/Framework/App/App.js";
 // @prepros-append "../src/EtdSolutions/Framework/Form/Form.js";
 
 // -- end framework

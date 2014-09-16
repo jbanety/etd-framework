@@ -30,20 +30,6 @@
         "mangle": true,
         "sourcemaps": false
       }
-    },
-    "7e3bd46b": {
-      "id": "7e3bd46b",
-      "pid": "d669df78",
-      "name": "Form.js",
-      "input": "../../../../../../EtdGlobalOne/submodules/jbanety/etd-framework/js/src/EtdSolutions/Framework/Form/Form.js",
-      "customOutput": false,
-      "type": "Js",
-      "config": {
-        "autoCompile": true,
-        "uglify": true,
-        "mangle": true,
-        "sourcemaps": false
-      }
     }
   },
   "imports": {
@@ -102,6 +88,14 @@
       "parents": [
         "c699366e"
       ]
+    },
+    "ea39b903": {
+      "id": "ea39b903",
+      "pid": "d669df78",
+      "path": "src/EtdSolutions/Framework/App/App.js",
+      "parents": [
+        "c699366e"
+      ]
     }
   },
   "images": {},
@@ -124,6 +118,22 @@
     "htmlTypes": "jade, haml, slim, markdown, md",
     "cssTypes": "less, sass, stylus, scss, styl",
     "jsTypes": "coffee, coffeescript, coffeescripts, ls, livescript, livescripts",
+    "cssPreprocessorPath": "",
+    "htmlPreprocessorPath": "",
+    "jsPreprocessorPath": "",
+    "minJsPreprocessorPath": "",
+    "autoprefixerBrowsers": "",
+    "ftpHost": "",
+    "ftpPort": "21",
+    "ftpRemotePath": "",
+    "ftpIgnorePreprocessorFiles": true,
+    "ftpType": "FTP",
+    "ftpExcludePatterns": "",
+    "ftpSecure": false,
+    "ftpPassword": "",
+    "ftpUsername": ""
+  }
+} livescripts",
     "cssPreprocessorPath": "",
     "htmlPreprocessorPath": "",
     "jsPreprocessorPath": "",
