@@ -288,6 +288,20 @@ abstract class NestedItemModel extends ItemModel {
     }
 
     /**
+     * Méthode pour reconstruire récursivement l'arbre en entier.
+     *
+     * @return  integer  1 + la valeur de droite de la racine en cas de succès, false en cas d'échec
+     *
+     * @throws  \RuntimeException en cas d'erreur db.
+     */
+    public function rebuild() {
+
+        $table = $this->getTable();
+        return $table->rebuild(null, 0, 0, '', $this->getReorderConditions($table));
+
+    }
+
+    /**
      * On change le positonnement de l'élément dans l'arbre avant de la sauvegarder.
      *
      * @param Table $table Le tableau à modifier.
