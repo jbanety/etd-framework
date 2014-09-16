@@ -1071,7 +1071,7 @@ abstract class NestedTable extends Table {
             }
         }
 
-        throw new \UnexpectedValueException(sprintf('%s::getRootId(%s)', get_class($this), $where));
+        throw new \UnexpectedValueException(sprintf('%s::getRootId(%s)', get_class($this), print_r($where, true)));
 
     }
 
@@ -1347,7 +1347,7 @@ abstract class NestedTable extends Table {
 
         // On contrôle la ligne retournée.
         if (empty($row)) {
-            throw new \UnexpectedValueException(sprintf('%s::getNode(%d, %s) failed. SQL: %s.', get_class($this), $id, $key, (string)$query));
+            throw new \UnexpectedValueException(sprintf('%s::getNode(%d, %s, %s) failed. SQL: %s.', get_class($this), $id, $key, $where, (string)$query));
         }
 
         // On effectue des calculs.
