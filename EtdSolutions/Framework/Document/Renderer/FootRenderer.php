@@ -10,6 +10,7 @@
 
 namespace EtdSolutions\Framework\Document\Renderer;
 
+use EtdSolutions\Framework\Application\Web;
 use EtdSolutions\Framework\Document\Document;
 use Joomla\Language\Text;
 
@@ -59,25 +60,39 @@ class FootRenderer extends DocumentRenderer {
 
         // Generate script declarations
         if (count($document->js['foot']) || count($document->domReadyJs) || count(Text::script())) {
-            $buffer .= '<script>' . "\n";
+
+            $app = Web::getInstance();
+            $buffer .= '<script>';
+
+            // On prépare le buffer pour les scripts JS.
+            $js = "\n";
+
             if (count(Text::script())) {
-                $buffer .= "if (typeof EtdSolutions !== undefined) {\n";
-                $buffer .= "  EtdSolutions.Framework.Language.Text.load(" . json_encode(Text::script()) . ");\n";
-                $buffer .= "}\n";
+                $js .= "if (typeof EtdSolutions !== undefined) {\n";
+                $js .= "  EtdSolutions.Framework.Language.Text.load(" . json_encode(Text::script()) . ");\n";
+                $js .= "}\n";
             }
+
             if (count($document->js['foot'])) {
                 foreach ($document->js['foot'] as $content) {
-                    $buffer .= $content . "\n";
+                    $js .= $content . "\n";
                 }
             }
+
             if (count($document->domReadyJs)) {
-                $buffer .= "jQuery(document).ready(function() {\n";
+                $js .= "jQuery(document).ready(function() {\n";
                 foreach ($document->domReadyJs as $content) {
-                    $buffer .= $content . "\n";
+                    $js .= $content . "\n";
                 }
-                $buffer .= "});\n";
+                $js .= "});\n";
             }
-            $buffer .= '</script>' . "\n";
+
+            // On compresse le JavaScript avec JShrink si configuré.
+            if ($app->get('minify_inline_js', false)) {
+                $js = \JShrink\Minifier::minify($js);
+            }
+
+            $buffer .= $js . '</script>' . "\n";
         }
 
         return $buffer;
