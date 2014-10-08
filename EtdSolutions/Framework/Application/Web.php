@@ -27,6 +27,9 @@ use EtdSolutions\Framework\Session\Session;
 use Joomla\Router\Router;
 use Joomla\Uri\Uri;
 use Joomla\String\String;
+use Monolog\Handler\NullHandler;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 
 defined('_JEXEC') or die;
 
@@ -121,12 +124,13 @@ final class Web extends AbstractWebApplication {
                 'prefix'   => $this->get('database.prefix'),
             ));
 
+            // Logger
+            $this->db->setLogger($this->getLogger());
+
             // Debug ?
             if (JDEBUG) {
                 $this->db->setDebug(true);
             }
-
-            //$this->db->connect();
         }
 
         return $this->db;
@@ -811,6 +815,21 @@ final class Web extends AbstractWebApplication {
      * C'est ici qu'on instancie le routeur de l'application les routes correspondantes vers les controllers.
      */
     protected function initialise() {
+
+        // On instancie le logger si besoin.
+        if ($this->get('log', false)) {
+
+            $logger = new Logger($this->get('sitename'));
+
+            if (is_dir(JPATH_LOGS)) {
+                $logger->pushHandler(new StreamHandler(JPATH_LOGS."/". $this->get('log_file'), (JDEBUG ? Logger::DEBUG : Logger::WARNING)));
+            } else { // If the log path is not set, just use a null logger.
+                $logger->pushHandler(new NullHandler, (JDEBUG ? Logger::DEBUG : Logger::WARNING));
+            }
+
+            $this->setLogger($logger);
+
+        }
 
         // On instancie la session.
         $this->setSession(Session::getInstance('Database', array(
