@@ -386,6 +386,144 @@ abstract class Table extends DataObject {
     }
 
     /**
+     * Méthode pour compacter les valeurs d'ordre des lignes dans un groupe de lignes définit
+     * oar la clause WHERE.
+     *
+     * @param   string $where La clause WHERE pour limiter la sélection.
+     *
+     * @return  mixed  Boolean  True en cas de sucès.
+     *
+     * @throws  \UnexpectedValueException
+     */
+    public function reorder($where = '') {
+
+        // If there is no ordering field set an error and return false.
+        if (!in_array('ordering', $this->getFields())) {
+            throw new \UnexpectedValueException(sprintf('%s does not support ordering.', get_class($this)));
+        }
+
+        $db = $this->getDb();
+
+        // Get the primary keys and ordering values for the selection.
+        $query = $db->getQuery(true)
+                    ->select($db->quoteName($this->getPk()) . ', ordering')
+                    ->from($this->getTable())
+                    ->where('ordering >= 0')
+                    ->order('ordering');
+
+        // Setup the extra where and ordering clause data.
+        if ($where) {
+            $query->where($where);
+        }
+
+        $db->setQuery($query);
+        $rows = $db->loadObjectList();
+
+        // Compact the ordering values.
+        foreach ($rows as $i => $row) {
+            // Make sure the ordering is a positive integer.
+            if ($row->ordering >= 0) {
+                // Only update rows that are necessary.
+                if ($row->ordering != $i + 1) {
+                    // Update the row ordering field.
+                    $query->clear()
+                          ->update($this->getTable())
+                          ->set('ordering = ' . ($i + 1))
+                          ->where($db->quoteName($this->getPk()) . " = " . $db->quote($row->{$this->getPk()}));
+                    $db->setQuery($query);
+                    $db->execute();
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Méthode pour déplacer une ligne dans la séquence d'ordre d'un groupe de lignes définit par une clause WHERE.
+     * Les nombres négatifs déplacer la ligne vers le haut et un nombre positif la déplacer vers le bas.
+     *
+     * @param   integer $delta La direction et la magnitude dans lesquelles déplacer la ligne.
+     * @param   string  $where La clause WHERE pour limiter la sélection de lignes.
+     *
+     * @return  mixed    Boolean  True en cas de succès
+     *
+     * @throws  \UnexpectedValueException
+     */
+    public function move($delta, $where = '') {
+
+        // If there is no ordering field set an error and return false.
+        if (!in_array('ordering', $this->getFields())) {
+            throw new \UnexpectedValueException(sprintf('%s does not support ordering.', get_class($this)));
+        }
+
+        // If the change is none, do nothing.
+        if (empty($delta)) {
+            return true;
+        }
+
+        $db    = $this->getDb();
+        $row   = null;
+        $query = $db->getQuery(true);
+
+        // Select the primary key and ordering values from the table.
+        $query->select($this->getPk() . ', ordering')
+              ->from($this->getTable());
+
+        // If the movement delta is negative move the row up.
+        if ($delta < 0) {
+            $query->where('ordering < ' . (int)$this->getProperty('ordering'))
+                  ->order('ordering DESC');
+        } // If the movement delta is positive move the row down.
+        elseif ($delta > 0) {
+            $query->where('ordering > ' . (int)$this->getProperty('ordering'))
+                  ->order('ordering ASC');
+        }
+
+        // Add the custom WHERE clause if set.
+        if ($where) {
+            $query->where($where);
+        }
+
+        // Select the first row with the criteria.
+        $db->setQuery($query, 0, 1);
+        $row = $db->loadObject();
+
+        // If a row is found, move the item.
+        if (!empty($row)) {
+            // Update the ordering field for this instance to the row's ordering value.
+            $query->clear()
+                  ->update($this->getTable())
+                  ->set('ordering = ' . (int)$row->ordering)
+                  ->where($db->quoteName($this->getPk()) . "=" . $db->quote($this->getProperty($this->getPk())));
+
+            $db->setQuery($query);
+            $db->execute();
+
+            // Update the ordering field for the row to this instance's ordering value.
+            $query->clear()
+                  ->update($this->getTable())
+                  ->set('ordering = ' . (int)$this->getProperty('ordering'))
+                  ->where($db->quoteName($this->getPk()) . "=" . $db->quote($row->{$this->getPk()}));
+            $db->setQuery($query);
+            $db->execute();
+
+            // Update the instance value.
+            $this->setProperty('ordering', $row->ordering);
+        } else {
+            // Update the ordering field for this instance.
+            $query->clear()
+                  ->update($this->getTable())
+                  ->set('ordering = ' . (int)$this->getProperty('ordering'))
+                  ->where($db->quoteName($this->getPk()) . "=" . $db->quote($this->getProperty($this->getPk())));
+            $db->setQuery($query);
+            $db->execute();
+        }
+
+        return true;
+    }
+
+    /**
      * Méthode pour effacer toutes les valeurs des propriétés de la classe.
      * La clé primaire sera ignorée.
      *

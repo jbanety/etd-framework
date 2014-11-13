@@ -21,11 +21,6 @@ defined('_JEXEC') or die;
 abstract class NestedItemModel extends ItemModel {
 
     /**
-     * @var array Les Conditions de sélection et de tri des lignes imbriquées.
-     */
-    protected $reorderConditions = null;
-
-    /**
      * Méthode pour enregistrer les données du formulaire.
      *
      * @param   array $data Les données du formulaire.
@@ -317,36 +312,5 @@ abstract class NestedItemModel extends ItemModel {
 
     }
 
-    /**
-     * Définit la WHERE pour réordonner les lignes.
-     *
-     * @param array $conditions Un tableau de conditions à ajouter pour effectuer l'ordre.
-     * @param Table $table      Une instance Table.
-     */
-    public function setReorderConditions($conditions = null, $table = null) {
-
-        if (!isset($conditions)) {
-            $conditions = array();
-        }
-
-        $this->reorderConditions = $conditions;
-    }
-
-    /**
-     * Donne la clause WHERE pour réordonner les lignes.
-     * Cela permet de s'assurer que la ligne sera déplacer relativement à une ligne qui correspondra à cette clause.
-     *
-     * @param   Table $table Une instance Table.
-     *
-     * @return  array  Un tableau de conditions à ajouter pour effectuer l'ordre.
-     */
-    protected function getReorderConditions($table) {
-
-        if (!isset($this->reorderConditions)) {
-            $this->setReorderConditions(null, $table);
-        }
-
-        return $this->reorderConditions;
-    }
 
 }

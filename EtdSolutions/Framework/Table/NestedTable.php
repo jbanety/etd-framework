@@ -160,7 +160,7 @@ abstract class NestedTable extends Table {
                   ->order('rgt ASC');
             $position = 'after';
         } else {
-            $query->where('lft < ' . $this->getProperty('$this->lft'))
+            $query->where('lft < ' . $this->getProperty('lft'))
                   ->order('lft DESC');
             $position = 'before';
         }

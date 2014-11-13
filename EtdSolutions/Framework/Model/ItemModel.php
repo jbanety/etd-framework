@@ -42,6 +42,11 @@ abstract class ItemModel extends Model {
     protected $cache = array();
 
     /**
+     * @var array Les Conditions de sélection et de tri des lignes imbriquées.
+     */
+    protected $reorderConditions = null;
+
+    /**
      * Instancie le modèle.
      *
      * @param Registry $state          L'état du modèle.
@@ -446,6 +451,63 @@ abstract class ItemModel extends Model {
     }
 
     /**
+     * Méthode pour ajuster l'ordre d'une ligne.
+     *
+     * Retourne NULL si l'utilisateur n'a pas les privilèges d'édition sur
+     * une des lignes sélectionnées.order
+     *
+     * @param   integer $pks   La clé primaire.
+     * @param   integer $delta Incrément, souvent +1 ou -1
+     *
+     * @return  mixed  False en cas d'échec
+     */
+    public function reorder($pks, $delta = 0) {
+
+        $table  = $this->getTable();
+        $pks    = (array)$pks;
+        $result = true;
+
+        $allowed = true;
+
+        foreach ($pks as $i => $pk) {
+            $table->clear();
+
+            if ($table->load($pk)) {
+
+                if (!$this->allowEdit($pk)) {
+                    unset($pks[$i]);
+                    $allowed = false;
+                    continue;
+                }
+
+                $where = $this->getReorderConditions($table);
+
+                if (!$table->move($delta, $where)) {
+                    $this->setError($table->getError());
+                    unset($pks[$i]);
+                    $result = false;
+                }
+
+            } else {
+                $this->setError($table->getError());
+                unset($pks[$i]);
+                $result = false;
+            }
+        }
+
+        if ($allowed === false && empty($pks)) {
+            $result = null;
+        }
+
+        // Clear the component's cache
+        if ($result == true) {
+            $this->cleanCache();
+        }
+
+        return $result;
+    }
+
+    /**
      * Méthode pour nettoyer le cache.
      *
      * @param null $id Un identifiant de cache optionnel.
@@ -460,7 +522,7 @@ abstract class ItemModel extends Model {
     protected function loadFormPaths() {
 
         // Application.
-        $app  = Web::getInstance();
+        $app = Web::getInstance();
 
         // On ajoute le chemin vers les fichiers XML des formulaires.
         FormHelper::addFormPath(JPATH_FORMS);
@@ -591,6 +653,38 @@ abstract class ItemModel extends Model {
         // Load the object state.
         $id = $app->input->get('id', 0, 'int');
         $this->set($this->context . '.id', $id);
+    }
+
+    /**
+     * Définit la WHERE pour réordonner les lignes.
+     *
+     * @param array $conditions Un tableau de conditions à ajouter pour effectuer l'ordre.
+     * @param Table $table      Une instance Table.
+     */
+    public function setReorderConditions($conditions = null, $table = null) {
+
+        if (!isset($conditions)) {
+            $conditions = array();
+        }
+
+        $this->reorderConditions = $conditions;
+    }
+
+    /**
+     * Donne la clause WHERE pour réordonner les lignes.
+     * Cela permet de s'assurer que la ligne sera déplacer relativement à une ligne qui correspondra à cette clause.
+     *
+     * @param   Table $table Une instance Table.
+     *
+     * @return  array  Un tableau de conditions à ajouter pour effectuer l'ordre.
+     */
+    protected function getReorderConditions($table) {
+
+        if (!isset($this->reorderConditions)) {
+            $this->setReorderConditions(null, $table);
+        }
+
+        return $this->reorderConditions;
     }
 
 }

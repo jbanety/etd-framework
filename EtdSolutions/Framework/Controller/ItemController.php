@@ -90,6 +90,10 @@ class ItemController extends Controller {
 
         // Valeur = -3
         $this->registerTask('report', 'publish');
+
+        // Ordre
+        $this->registerTask('orderup', 'reorder');
+        $this->registerTask('orderdown', 'reorder');
     }
 
     /**
@@ -430,6 +434,40 @@ class ItemController extends Controller {
 
         return true;
 
+    }
+
+    /**
+     * Change l'ordre d'un ou plusieurs enregistrements.
+     *
+     * @return  boolean  True en cas de succès.
+     */
+    public function reorder() {
+
+        // App
+        $app = $this->getApplication();
+
+        // On contrôle le jeton de la requête.
+        if (!$app->checkToken()) {
+            $app->raiseError(Text::_('APP_ERROR_INVALID_TOKEN', 403));
+        }
+
+        $ids = $this->getInput()->get('cid', array(), 'array');
+        $inc = ($this->task == 'orderup') ? -1 : 1;
+
+        $model  = $this->getModel();
+        $return = $model->reorder($ids, $inc);
+
+        if ($return === false) {
+            // Reorder failed.
+            $this->redirect("/" . $this->listRoute, Text::_('CTRL_' . strtoupper($this->getName()) . '_REORDER_FAILED'), 'error');
+
+            return false;
+        } else {
+            // Reorder succeeded.
+            $this->redirect("/" . $this->listRoute, Text::_('CTRL_' . strtoupper($this->getName()) . '_ITEM_REORDERED'), 'success');
+
+            return true;
+        }
     }
 
     /**
