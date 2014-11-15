@@ -35,9 +35,8 @@ class UserTable extends Table {
 
         return array(
             'id',
-            'civility',
-            'firstName',
-            'lastName',
+            'company_id',
+            'name',
             'username',
             'email',
             'password',
@@ -45,11 +44,14 @@ class UserTable extends Table {
             'sendEmail',
             'registerDate',
             'lastvisitDate',
+            'activation',
             'params',
+            'rights',
             'lastResetTime',
             'resetCount',
-            'rights',
-            'company_id'
+            'otpKey',
+            'otep',
+            'requireReset'
         );
     }
 
