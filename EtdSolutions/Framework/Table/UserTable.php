@@ -51,7 +51,8 @@ class UserTable extends Table {
             'resetCount',
             'otpKey',
             'otep',
-            'requireReset'
+            'requireReset',
+            'profile'
         );
     }
 
@@ -154,6 +155,98 @@ class UserTable extends Table {
 
         return true;
 
+    }
+
+    public function load($pk = null) {
+
+        $result = parent::load($pk);
+
+        if ($result) {
+
+            // On récupère les données du profil.
+            $db    = $this->getDb();
+            $query = $db->getQuery(true)
+                        ->select('a.profile_key, a.profile_value')
+                        ->from('#__user_profiles AS a')
+                        ->where('a.user_id = ' . (int)$this->getProperty($this->getPk()));
+
+            $data = $db->setQuery($query)
+                          ->loadObjectList();
+
+            $profile = array();
+            foreach($data as $d) {
+                $profile[$d->profile_key] = $d->profile_value;
+            }
+
+            // On relie la ligne avec le table.
+            $this->bind(array('profile' => $profile));
+
+        }
+
+        return $result;
+    }
+
+    public function store($updateNulls = false) {
+
+        $db = $this->getDb();
+
+        // On récupère les propriétés.
+        $properties = $this->dump(0);
+
+        // On sépare les données de profil.
+        $hasProfile = property_exists($properties, 'profile');
+        if ($hasProfile) {
+            $profile = $properties->profile;
+            unset($properties->profile);
+        }
+
+        // Si une clé primaire existe on met à jour l'objet, sinon on l'insert.
+        if ($this->hasPrimaryKey()) {
+            $result = $db->updateObject($this->table, $properties, $this->pk, $updateNulls);
+
+            // On traite le profil.
+            if ($hasProfile) {
+
+                // On supprime toutes les clés dans la table.
+                $db->setQuery('DELETE FROM #__user_profiles WHERE user_id = ' . (int)$properties->{$this->pk})
+                   ->execute();
+
+            }
+
+        } else {
+            $result = $db->insertObject($this->table, $properties, $this->pk);
+
+            // On met à jour la nouvelle clé primaire dans le table.
+            $this->setProperty($this->pk, $properties->{$this->pk});
+        }
+
+        if ($hasProfile) {
+
+            $tuples = array();
+
+            foreach (get_object_vars($profile) as $k => $v) {
+                $tuples[] = array(
+                    $this->getProperty($this->getPk()),
+                    $k,
+                    $v
+                );
+            }
+
+            $query = $db->getQuery(true)
+                        ->insert('#__user_profile')
+                        ->columns(array(
+                                'user_id',
+                                'profile_key',
+                                'profile_value'
+                            ))
+                        ->values($tuples);
+
+            $db->setQuery($query)
+               ->execute();
+
+        }
+
+        return $result;
     }
 
 }

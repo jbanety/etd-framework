@@ -18,11 +18,13 @@ use Joomla\Data\DataObject;
 use Joomla\Filter\InputFilter;
 use Joomla\Language\Text;
 use Joomla\Registry\Registry;
+use Joomla\Utilities\ArrayHelper;
 
 defined('_JEXEC') or die;
 
 /**
  * Class User
+ *
  * @package EtdSolutions\Framework\User
  *
  * @property integer  $id     L'identifiant de l'utilisateur.
@@ -54,7 +56,8 @@ class User extends DataObject {
                 'sendEmail' => 0,
                 'guest'     => 1,
                 'rights'    => new Registry,
-                'params'    => new Registry
+                'params'    => new Registry,
+                'profile'   => new \stdClass()
             );
         }
 
@@ -181,6 +184,9 @@ class User extends DataObject {
             // On transforme les paramètres en registre.
             $user->params = new Registry($user->params);
 
+            // On transforme le profile en objet.
+            $user->profile = ArrayHelper::toObject($user->profile);
+
             // On vire le mot de passe.
             $user->password = '';
 
@@ -219,7 +225,7 @@ class User extends DataObject {
            ->execute();
 
         // On supprime tous les cookie d'authentification de l'utilisateur.
-        $cookieName	 = $app->getShortHashedUserAgent();
+        $cookieName  = $app->getShortHashedUserAgent();
         $cookieValue = $input->cookie->get($cookieName);
 
         // S'il n y a de cookie à supprimer.
@@ -230,15 +236,15 @@ class User extends DataObject {
         $cookieArray = explode('.', $cookieValue);
 
         // On filtre la série car on l'utilise dans la requête.
-        $filter	= new InputFilter;
-        $series	= $filter->clean($cookieArray[1], 'ALNUM');
+        $filter = new InputFilter;
+        $series = $filter->clean($cookieArray[1], 'ALNUM');
 
         // On supprime l'enregistrement dans la base de données.
         $query = $db->getQuery(true);
-        $query
-            ->delete('#__user_keys')
-            ->where($db->quoteName('series') . ' = ' . $db->quote($series));
-        $db->setQuery($query)->execute();
+        $query->delete('#__user_keys')
+              ->where($db->quoteName('series') . ' = ' . $db->quote($series));
+        $db->setQuery($query)
+           ->execute();
 
         // On supprime le cookie.
         $input->cookie->set($cookieName, false, time() - 42000, $app->get('cookie_path', '/'), $app->get('cookie_domain'));
