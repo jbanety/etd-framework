@@ -325,7 +325,7 @@ abstract class ItemsModel extends Model {
         }
 
         // Limites
-        $limit = $app->getUserStateFromRequest($this->context . '.limit', 'limit', $app->get('list_limit'), 'uint');
+        $limit = $app->getUserStateFromRequest($this->context . '.limit', 'limit', $app->get($this->context.'.list_limit', $app->get('list_limit')), 'uint');
         $this->set('list.limit', $limit);
 
         // Check if the ordering field is in the white list, otherwise use the incoming value.
