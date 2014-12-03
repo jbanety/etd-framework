@@ -122,6 +122,11 @@ class User extends DataObject {
         // On contrôle que c'est bien un registre.
         if ($rights instanceof Registry) {
 
+            // On teste d'abord si c'est un administrateur (un dieu !)
+            if ($rights->get("app.admin", false)) {
+                return true;
+            }
+
             // On récupère la valeur.
             $right = $rights->get($path, false);
 
