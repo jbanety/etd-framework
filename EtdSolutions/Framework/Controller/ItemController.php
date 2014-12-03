@@ -202,6 +202,7 @@ class ItemController extends Controller {
 
     }
 
+
     /**
      * Méthode pour sauver un enregistrement.
      */
@@ -451,7 +452,8 @@ class ItemController extends Controller {
             $app->raiseError(Text::_('APP_ERROR_INVALID_TOKEN', 403));
         }
 
-        $ids = $this->getInput()->get('cid', array(), 'array');
+        $ids = $this->getInput()
+                    ->get('cid', array(), 'array');
         $inc = ($this->task == 'orderup') ? -1 : 1;
 
         $model  = $this->getModel();
@@ -477,8 +479,9 @@ class ItemController extends Controller {
      */
     protected function allowAdd() {
 
-        return User::getInstance()
-                   ->authorise('add', $this->getName());
+        $user = User::getInstance();
+
+        return ($user->authorise('add', $this->getName()) || $user->authorise("admin", "app"));
     }
 
     /**
@@ -490,8 +493,9 @@ class ItemController extends Controller {
      */
     protected function allowEdit($id = null) {
 
-        return User::getInstance()
-                   ->authorise('edit', $this->getName());
+        $user = User::getInstance();
+
+        return ($user->authorise('edit', $this->getName()) || $user->authorise("admin", "app"));
     }
 
     /**
@@ -503,8 +507,9 @@ class ItemController extends Controller {
      */
     protected function allowDelete($id = null) {
 
-        return User::getInstance()
-                   ->authorise('delete', $this->getName());
+        $user = User::getInstance();
+
+        return ($user->authorise('delete', $this->getName()) || $user->authorise("admin", "app"));
     }
 
     /**
@@ -516,8 +521,9 @@ class ItemController extends Controller {
      */
     protected function allowView($id = null) {
 
-        return User::getInstance()
-                   ->authorise('view', $this->getName());
+        $user = User::getInstance();
+
+        return ($user->authorise('view', $this->getName()) || $user->authorise("admin", "app"));
     }
 
     /**
