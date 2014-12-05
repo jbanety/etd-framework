@@ -113,6 +113,74 @@ class HtmlUtility {
     }
 
     /**
+     * Génère un icône d'état pour un élément.
+     *
+     * @param int $value La valeur de l'état
+     * @param bool $tooltips Si true, on affiche une info-bulle avec l'état
+     * @param string $tooltipPlacement Emplacement de l'info-bulle.
+     * @param string $href Valeur de l'attribut href du lien
+     * @param null $class Classe CSS
+     *
+     * @return string
+     */
+    public static function state($value, $tooltips = true, $tooltipPlacement = 'top', $href = '#', $class = null) {
+
+        $class = !empty($class) ? $class : '';
+
+        if ($tooltips) {
+            $class .= ' hasTooltip';
+        }
+
+        $html = '<a href="' . $href . '"';
+
+        if (!empty($class)) {
+            $html .= ' class="' . $class . '"';
+        }
+
+        if ($tooltips) {
+
+            switch ($value) {
+                default:
+                case 0:
+                    $tooltipText = 'APP_GLOBAL_STATE_0';
+                    break;
+                case 1:
+                    $tooltipText = 'APP_GLOBAL_STATE_1';
+                    break;
+                case 2:
+                    $tooltipText = 'APP_GLOBAL_STATE_2';
+                    break;
+                case -2:
+                    $tooltipText = 'APP_GLOBAL_STATE__2';
+                    break;
+            }
+
+            $html .= ' data-toggle="tooltip" data-placement="' . $tooltipPlacement . '" title="' . self::tooltipText($tooltipText) . '"';
+        }
+
+        switch ($value) {
+            default:
+            case 0:
+                $icon = 'times';
+                break;
+            case 1:
+                $icon = 'check';
+                break;
+            case 2:
+                $icon = 'archive';
+                break;
+            case -2:
+                $icon = 'trash';
+                break;
+        }
+
+        $html .= '><span class="fa fa-' . $icon .'"></span></a>';
+
+        return $html;
+
+    }
+
+    /**
      * Méthode pour effectuer le rendu.
      *
      * @param string $layout Le nom du layout.
