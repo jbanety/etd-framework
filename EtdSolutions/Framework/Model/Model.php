@@ -210,7 +210,7 @@ abstract class Model extends AbstractDatabaseModel {
     public function setError($error) {
         $this->errors[] = $error;
     }
-w
+
     /**
      * Méthode pour définir automatiquement l'état du modèle.
      *
