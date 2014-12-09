@@ -547,7 +547,7 @@ abstract class ItemModel extends Model {
     protected function allowDelete($id = null) {
 
         return User::getInstance()
-                   ->authorise('delete', $this->getName());
+                   ->authorise('delete', strtolower($this->getName()));
     }
 
     /**
@@ -560,7 +560,7 @@ abstract class ItemModel extends Model {
     protected function allowAdd() {
 
         return User::getInstance()
-                   ->authorise('add', $this->getName());
+                   ->authorise('add', strtolower($this->getName()));
     }
 
     /**
@@ -573,7 +573,7 @@ abstract class ItemModel extends Model {
     protected function allowEdit($id = null) {
 
         return User::getInstance()
-                   ->authorise('edit', $this->getName());
+                   ->authorise('edit', strtolower($this->getName()));
     }
 
     /**

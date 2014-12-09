@@ -186,6 +186,7 @@ class ItemController extends Controller {
         // On s'assure que ce sont bien des integers.
         $id = ArrayHelper::toInteger($id);
 
+
         // On effectue la suppression.
         if ($model->delete($id)) {
 
@@ -481,7 +482,7 @@ class ItemController extends Controller {
 
         $user = User::getInstance();
 
-        return ($user->authorise('add', $this->getName()) || $user->authorise("admin", "app"));
+        return ($user->authorise('add', strtolower($this->getName())) || $user->authorise("admin", "app"));
     }
 
     /**
@@ -495,7 +496,7 @@ class ItemController extends Controller {
 
         $user = User::getInstance();
 
-        return ($user->authorise('edit', $this->getName()) || $user->authorise("admin", "app"));
+        return ($user->authorise('edit', strtolower($this->getName())) || $user->authorise("admin", "app"));
     }
 
     /**
@@ -509,7 +510,7 @@ class ItemController extends Controller {
 
         $user = User::getInstance();
 
-        return ($user->authorise('delete', $this->getName()) || $user->authorise("admin", "app"));
+        return ($user->authorise('delete', strtolower($this->getName())) || $user->authorise("admin", "app"));
     }
 
     /**
@@ -523,7 +524,7 @@ class ItemController extends Controller {
 
         $user = User::getInstance();
 
-        return ($user->authorise('view', $this->getName()) || $user->authorise("admin", "app"));
+        return ($user->authorise('view', strtolower($this->getName())) || $user->authorise("admin", "app"));
     }
 
     /**
