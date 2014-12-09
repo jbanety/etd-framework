@@ -298,7 +298,7 @@ abstract class Controller extends AbstractController {
             if (!preg_match('/(.*)Controller/i', $classname, $r)) {
                 throw new \RuntimeException('Unable to detect controller name', 500);
             }
-            $this->name = strtolower($r[1]);
+            $this->name = $r[1];
         }
 
         return $this->name;
