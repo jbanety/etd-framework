@@ -56,7 +56,7 @@ class UserTable extends Table {
         );
     }
 
-    public function bind($properties, $updateNulls = true) {
+    public function bind($properties, $updateNulls = true, $ignore = array()) {
 
         // On génère le mot de passe crypté si besoin.
         if (array_key_exists('password', $properties) && !empty($properties['password']) && substr($properties['password'], 0, 4) != '$2a$' && substr($properties['password'], 0, 4) != '$2y$') {
@@ -76,7 +76,7 @@ class UserTable extends Table {
             $properties['params'] = $registry->toString();
         }
 
-        return parent::bind($properties, $updateNulls);
+        return parent::bind($properties, $updateNulls, $ignore);
     }
 
     public function check() {
