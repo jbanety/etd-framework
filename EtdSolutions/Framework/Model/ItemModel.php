@@ -140,11 +140,11 @@ abstract class ItemModel extends Model {
             throw new \RuntimeException(Text::sprintf('APP_ERROR_FORM_NOT_LOADED', $name), 500);
         }
 
-        // On modifie le formulaire si besoin.
-        $form = $this->preprocessForm($form);
-
         // On charge les données si nécessaire.
         $data = $this->loadFormData($options);
+
+        // On modifie le formulaire si besoin.
+        $form = $this->preprocessForm($form, $data);
 
         // On les lie au formulaire.
         if (!empty($data)) {
@@ -579,11 +579,12 @@ abstract class ItemModel extends Model {
     /**
      * Méthode pour modifier le formulaire avant la liaison avec les données.
      *
-     * @param Form $form
+     * @param Form  $form Le formulaire.
+     * @param array $data Les données liées au formulaire
      *
      * @return Form
      */
-    protected function preprocessForm(Form $form) {
+    protected function preprocessForm(Form $form, $data = array()) {
 
         return $form;
     }
