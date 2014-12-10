@@ -47,7 +47,7 @@ class ItemController extends Controller {
 
         // On devine la route de l'élément suivant le nom du controller.
         if (empty($this->itemRoute)) {
-            $this->itemRoute = strtolower($this->getName());
+            $this->itemRoute = $this->getName();
         }
 
         // On devine la route de listing comme le pluriel de la route pour un élément.
@@ -482,7 +482,7 @@ class ItemController extends Controller {
 
         $user = User::getInstance();
 
-        return ($user->authorise('add', strtolower($this->getName())) || $user->authorise("admin", "app"));
+        return ($user->authorise('add', $this->getName()) || $user->authorise("admin", "app"));
     }
 
     /**
@@ -496,7 +496,7 @@ class ItemController extends Controller {
 
         $user = User::getInstance();
 
-        return ($user->authorise('edit', strtolower($this->getName())) || $user->authorise("admin", "app"));
+        return ($user->authorise('edit', $this->getName()) || $user->authorise("admin", "app"));
     }
 
     /**
@@ -510,7 +510,7 @@ class ItemController extends Controller {
 
         $user = User::getInstance();
 
-        return ($user->authorise('delete', strtolower($this->getName())) || $user->authorise("admin", "app"));
+        return ($user->authorise('delete', $this->getName()) || $user->authorise("admin", "app"));
     }
 
     /**
@@ -524,7 +524,7 @@ class ItemController extends Controller {
 
         $user = User::getInstance();
 
-        return ($user->authorise('view', strtolower($this->getName())) || $user->authorise("admin", "app"));
+        return ($user->authorise('view', $this->getName()) || $user->authorise("admin", "app"));
     }
 
     /**

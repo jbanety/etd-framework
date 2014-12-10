@@ -189,7 +189,7 @@ abstract class Model extends AbstractDatabaseModel {
             if (!preg_match('/(.*)Model/i', $classname, $r)) {
                 throw new \RuntimeException('Unable to detect model name', 500);
             }
-            $this->name = /*strtolower(*/$r[1]/*)*/;
+            $this->name = $r[1];
         }
 
         return $this->name;

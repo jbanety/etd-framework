@@ -895,7 +895,7 @@ final class Web extends AbstractWebApplication {
         $controller = $this->route();
 
         // On sauvegarde le controller actif.
-        $this->_activeController = $controller->getName();
+        $this->_activeController = strtolower($controller->getName());
 
         try {
 

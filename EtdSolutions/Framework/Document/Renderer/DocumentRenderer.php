@@ -49,7 +49,7 @@ class DocumentRenderer {
         $this->_doc = $doc;
 
         // Le layout est fixé au nom du renderer.
-        $this->layout = $this->getName();
+        $this->layout = strtolower($this->getName());
 
         // Chemins de recherche du layout.
         $paths = new \SplPriorityQueue;
@@ -101,7 +101,7 @@ class DocumentRenderer {
             if (!preg_match('/(.*)Renderer/i', $classname, $r)) {
                 throw new \RuntimeException('Unable to detect renderer name', 500);
             }
-            $this->name = strtolower($r[1]);
+            $this->name = $r[1];
         }
 
         return $this->name;

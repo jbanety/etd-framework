@@ -52,7 +52,7 @@ class HtmlView extends AbstractHtmlView {
     protected function loadPaths() {
 
         $paths = new \SplPriorityQueue;
-        $paths->insert(JPATH_THEME . '/html/views/' . $this->getName(), 1);
+        $paths->insert(JPATH_THEME . '/html/views/' . strtolower($this->getName()), 1);
         $this->paths = $paths;
 
         return $this->paths;
@@ -112,7 +112,7 @@ class HtmlView extends AbstractHtmlView {
             if (!preg_match('/(.*)View/i', $classname, $r)) {
                 throw new \RuntimeException('Unable to detect view name', 500);
             }
-            $this->name = strtolower($r[1]);
+            $this->name = $r[1];
         }
 
         return $this->name;

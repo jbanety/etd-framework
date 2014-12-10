@@ -114,7 +114,7 @@ class User extends DataObject {
     public function authorise($action, $section) {
 
         // On contruit le chemin dans le registre des droits.
-        $path = $section . "." . $action;
+        $path = strtolower($section . "." . $action);
 
         // On charge le registre.
         $rights = $this->getProperty('rights');
