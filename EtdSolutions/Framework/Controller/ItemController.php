@@ -47,7 +47,7 @@ class ItemController extends Controller {
 
         // On devine la route de l'élément suivant le nom du controller.
         if (empty($this->itemRoute)) {
-            $this->itemRoute = $this->getName();
+            $this->itemRoute = strtolower($this->getName());
         }
 
         // On devine la route de listing comme le pluriel de la route pour un élément.
