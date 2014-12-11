@@ -26,6 +26,11 @@ defined('_JEXEC') or die;
 abstract class Controller extends AbstractController {
 
     /**
+     * @var string Contexte
+     */
+    protected $context = '';
+
+    /**
      * @var string Tâche par défaut à exécuter.
      */
     protected $defaultTask = 'display';
@@ -123,6 +128,9 @@ abstract class Controller extends AbstractController {
 
         // On détermine le modèle par défaut grâce au nom du controller.
         $this->defaultModel = $this->getName();
+
+        // Contexte
+        $this->context = strtolower($this->getName());
 
     }
 

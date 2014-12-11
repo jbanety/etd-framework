@@ -255,7 +255,7 @@ class ItemController extends Controller {
             }
 
             // On sauvegarde les données dans la session.
-            $app->setUserState($this->getName() . '.edit.data', $data);
+            $app->setUserState($this->context . '.edit.data', $data);
 
             // on renvoie vers le formulaire.
             $this->redirect("/" . $this->itemRoute . $this->getRedirectToItemAppend($recordId));
@@ -267,7 +267,7 @@ class ItemController extends Controller {
         if (!$model->save($data)) {
 
             // On sauvegarde les données VALIDÉES dans la session.
-            $app->setUserState($this->getName() . '.edit.data', $data);
+            $app->setUserState($this->context . '.edit.data', $data);
 
             // on renvoie vers le formulaire.
             $this->redirect("/" . $this->itemRoute . $this->getRedirectToItemAppend($recordId), Text::sprintf('APP_ERROR_CTRL_SAVE_FAILED', $model->getError()), 'error');
@@ -280,7 +280,7 @@ class ItemController extends Controller {
         $this->afterSave($model, $data);
 
         // On nettoie les informations d'édition de l'enregistrement dans la session.
-        $app->setUserState($this->getName() . '.edit.data', null);
+        $app->setUserState($this->context . '.edit.data', null);
 
         // On redirige vers la page de listing.
         $this->redirect("/" . $this->listRoute, Text::_('CTRL_' . strtoupper($this->getName()) . '_SAVE_SUCCESS'), 'success');
@@ -296,7 +296,7 @@ class ItemController extends Controller {
 
         // On nettoie les informations d'édition de l'enregistrement dans la session.
         Web::getInstance()
-           ->setUserState($this->getName() . '.edit.data', null);
+           ->setUserState($this->context . '.edit.data', null);
 
         // On redirige vers la liste.
         $this->redirect("/" . $this->listRoute);
@@ -317,7 +317,7 @@ class ItemController extends Controller {
 
         // On nettoie les informations d'édition de l'enregistrement dans la session.
         Web::getInstance()
-           ->setUserState($this->getName() . '.edit.data', null);
+           ->setUserState($this->context . '.edit.data', null);
 
         //On affiche la vue
         return $this->display();
@@ -482,7 +482,7 @@ class ItemController extends Controller {
 
         $user = User::getInstance();
 
-        return ($user->authorise('add', $this->getName()) || $user->authorise("admin", "app"));
+        return ($user->authorise('add', $this->context) || $user->authorise("admin", "app"));
     }
 
     /**
@@ -496,7 +496,7 @@ class ItemController extends Controller {
 
         $user = User::getInstance();
 
-        return ($user->authorise('edit', $this->getName()) || $user->authorise("admin", "app"));
+        return ($user->authorise('edit', $this->context) || $user->authorise("admin", "app"));
     }
 
     /**
@@ -510,7 +510,7 @@ class ItemController extends Controller {
 
         $user = User::getInstance();
 
-        return ($user->authorise('delete', $this->getName()) || $user->authorise("admin", "app"));
+        return ($user->authorise('delete', $this->context) || $user->authorise("admin", "app"));
     }
 
     /**
@@ -524,7 +524,7 @@ class ItemController extends Controller {
 
         $user = User::getInstance();
 
-        return ($user->authorise('view', $this->getName()) || $user->authorise("admin", "app"));
+        return ($user->authorise('view', $this->context) || $user->authorise("admin", "app"));
     }
 
     /**
