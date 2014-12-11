@@ -52,4 +52,36 @@ class DateUtility {
 
     }
 
+    /**
+     * Méthode pour déplacer une date suivant un interval (e.g. -P7D, -P1DT1H ou +PT5H)
+     *
+     * @param string $date
+     * @param string $interval
+     *
+     * @return Date
+     */
+    public static function moveDate($date, $interval) {
+
+        // Si ce n'est un objet Date, on le crée.
+        if (!($date instanceof Date)) {
+            $date = new Date($date);
+        }
+
+        // On transforme l'intervale en format ISO.
+        $iso = strtoupper(substr($interval, 1));
+
+        // On crée l'intervale de date
+        $dateint = new \DateInterval($iso);
+
+        // On ajoute si on a un "+"
+        if (strpos($interval, '+') === 0) {
+            $date->add($dateint);
+        } elseif (strpos($interval, '-') === 0) { // On retire si on a un "-"
+            $date->sub($dateint);
+        }
+
+        return $date;
+
+    }
+
 }
