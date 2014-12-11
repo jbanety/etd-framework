@@ -36,6 +36,8 @@ class MessageRenderer extends DocumentRenderer {
             }
         }
 
+        $buffer = '<div id="message-container">';
+
         if (!empty($lists)) {
             $buffer .= '<ul class="alerts-list">';
             foreach ($lists as $type => $messages) {
@@ -53,6 +55,8 @@ class MessageRenderer extends DocumentRenderer {
             }
             $buffer .= '</ul>';
         }
+
+        $buffer .= '</div>';
 
         return $buffer;
     }
