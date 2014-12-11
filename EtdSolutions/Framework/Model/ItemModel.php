@@ -376,6 +376,8 @@ abstract class ItemModel extends Model {
                     return false;
                 }
 
+                $this->afterDuplicatedTable($table, $pk);
+
             } else {
 
                 // On retire la clé primaire fautive.
@@ -610,6 +612,18 @@ abstract class ItemModel extends Model {
      * @param Table $table Une référence à un objet Table.
      */
     protected function prepareDuplicatedTable(Table &$table) {
+
+        // Les classes dérivées pourront l'implémenter si besoin.
+
+    }
+
+    /**
+     * Est appelée après la duplication d'un Table.
+     *
+     * @param Table $table  Une référence à un objet Table.
+     * @param int   $old_pk L'ancien identifint.
+     */
+    protected function afterDuplicatedTable(Table &$table, $old_pk) {
 
         // Les classes dérivées pourront l'implémenter si besoin.
 
