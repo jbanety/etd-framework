@@ -69,7 +69,8 @@ class FootRenderer extends DocumentRenderer {
 
             if (count(Text::script())) {
                 $js .= "if (typeof EtdSolutions !== undefined) {\n";
-                $js .= "  EtdSolutions.Framework.Language.Text.load(" . json_encode(Text::script()) . ");\n";
+                $js .= "  var Text = EtdSolutions.Framework.Language.Text;";
+                $js .= "  Text.load(" . json_encode(Text::script()) . ");\n";
                 $js .= "}\n";
             }
 
