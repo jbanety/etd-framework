@@ -67,7 +67,7 @@ abstract class Daemon extends AbstractDaemonApplication {
 
         // On instancie le logger.
         $logger = new Logger($this->get('application_name'));
-        $logger->pushHandler(new StreamHandler(JPATH_LOGS . "/" . $this->get('application_logfile'), Logger::INFO));
+        $logger->pushHandler(new StreamHandler(JPATH_LOGS . "/" . $this->get('application_logfile'), $this->get('logger_level')));
         $this->setLogger($logger);
 
         // PID
